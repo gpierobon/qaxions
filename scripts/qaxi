@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DATA_DIR="${1:output}"
+PAUSE="${2:-0.1}"
+
+python3 "scripts/plot_density.py" "$DATA_DIR" "$PAUSE"
