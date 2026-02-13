@@ -313,6 +313,8 @@ void IO::writeConf(const Field& field, bool save_psi)
     PROFILE(IO)
     const int N = field.size();
     const int dim = field.dim();
+    const int curr = field.curr();
+    const double time = field.time();
     const size_t sites = field.sites();
 
     std::array<hsize_t,3> dims;
@@ -354,6 +356,8 @@ void IO::writeConf(const Field& field, bool save_psi)
     createGroup("Header");
     writeAttribute<int>   ("Header", "N",     N);
     writeAttribute<int>   ("Header", "dim",   dim);
+    writeAttribute<int>   ("Header", "step",  curr);
+    writeAttribute<double>("Header", "time",  time);
     writeAttribute<double>("Header", "Lbox",  field.Lbox());
 
 }

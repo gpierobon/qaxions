@@ -51,6 +51,7 @@ class Field
         double rhomax() const { return rhomax_; }
         bool   verb()  const { return verb_;}
         int   curr()  const { return curr_;}
+        double time()  const { return s_;}
         int   nsteps()  const { return nsteps_;}
 
 

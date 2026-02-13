@@ -23,10 +23,13 @@ void Field::init(const Params& pars)
     Lbox_   = pars.Lbox;
     dim_    = pars.dim;
     norm_   = pars.norm;    // Might create a header entry for this 
+    
     nthr_   = pars.nthr;
-    ds_     = pars.dt;
     nsteps_ = pars.nsteps;
     verb_   = pars.verb;
+
+    s_      = 0;
+    ds_     = pars.dt;
 
     fft_backend_ = std::make_unique<FFTWOpenMPBackend>
                    (dim_, N_, Lbox_, pars.plan, verb_, nthr_);
@@ -102,7 +105,7 @@ void Field::drift(double dt)
     const int hN     = N_ / 2;
 
     if (verb_)
-        std::cout << "[drift] Applying c2c forward ..." << std::endl;
+        std::cout << "[Step: " << curr_ << ", drift] Applying c2c forward ..." << std::endl;
 
     {
         PROFILE(FFT)
@@ -322,12 +325,14 @@ void Field::updatePotential()
 void Field::updateTime()
 {
     curr_ += 1;
+    s_ += ds_;
 }
 
 void Field::propagate()
 {
     kick(0.5 * ds_);
     drift(ds_);
+    updateTime();
     updatePotential();
     kick(0.5 * ds_);
 }

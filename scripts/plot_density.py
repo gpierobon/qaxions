@@ -21,12 +21,15 @@ im = None
 for fname in files:
     with h5.File(fname, "r") as f:
         density = np.array(f['/rho/data'])
+        N = int(f['Header'].attrs['N'])
         dim = int(f['Header'].attrs['dim'])
+        time = float(f['Header'].attrs['time'])
 
     me = np.mean(density)
     rho = density / me
     if dim == 3:
         rho = np.mean(rho, axis=0)
+        #rho = np.mean(rho[N//2-N//16:N//2+N//16], axis=0)
 
     logdens = np.log10(rho)
 
@@ -34,7 +37,7 @@ for fname in files:
         im = ax.imshow(
             logdens,
             cmap=cmr.pride,
-            vmin=-1,
+            vmin=-0.5,
             vmax=2,
             origin="lower"
         )
@@ -45,7 +48,7 @@ for fname in files:
     else:
         im.set_data(logdens)
 
-    ax.set_title(os.path.basename(fname))
+    ax.set_title(r'$s = %.4f$'%time)
     plt.pause(speed)   # controls playback speed
 
 plt.ioff()
