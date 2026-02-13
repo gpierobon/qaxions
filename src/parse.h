@@ -28,6 +28,7 @@ typedef struct
 
     ICType ictype;
     FFTPlanType plan; 
+    MeasureType measinfo;
 
 } Params;
 

@@ -1,5 +1,6 @@
 #include <omp.h>
 #include "parse.h"
+#include "meas.h"
 #include <unordered_map>
 
 
@@ -23,6 +24,7 @@ void defaults(Params& pars)
 
     pars.ictype = ICType::SOLITONS,
     pars.plan = FFTPlanType::ESTIMATE;
+    pars.measinfo = MeasureType::NONE;
 
 }
 
@@ -42,7 +44,8 @@ void printHelp()
       --norm   <float>   Poisson's equation normalisation
       --dt     <float>   Time step
       --steps  <int>     Number of time steps
-      --meas   <int>     Number of measurements
+      --nmeas  <int>     Number of measurements
+      --meas   <int>     Type of measurements (use --measinfo)
       --t      <float>   Final time
       --fft    <int>     FFTW plan: estimate (0) | measure (1) | patient | exhaustive
       --help          Show help
@@ -61,10 +64,14 @@ void parseArgs(int argc, char* argv[], Params* pars)
         else if (arg == "--L"     && i+1 < argc) { pars->Lbox   = atof(argv[++i]); }
         else if (arg == "--dt"    && i+1 < argc) { pars->dt     = atof(argv[++i]); }
         else if (arg == "--steps" && i+1 < argc) { pars->nsteps = atoi(argv[++i]); }
-        else if (arg == "--meas"  && i+1 < argc) { pars->nmeas  = atoi(argv[++i]); }
+        else if (arg == "--nmeas" && i+1 < argc) { pars->nmeas  = atoi(argv[++i]); }
         else if (arg == "--dir"   && i+1 < argc) { pars->dir    = argv[++i]; }
         else if (arg == "--verb"               ) { pars->verb   = true; }
         else if (arg == "--readj"              ) { pars->readj  = true; }
+        else if (arg == "--meas"               )
+        {
+            pars->measinfo = parseMeasureType(atoi(argv[++i]));
+        }
         else if (arg == "--dim"   && i+1 < argc)
         {
             pars->dim = atoi(argv[++i]);

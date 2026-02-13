@@ -19,13 +19,14 @@ void Field::init(const Params& pars)
     if (V_)    { fftw_free(V_);     V_   = nullptr; }
     if (Vhat_) { fftw_free(Vhat_); Vhat_ = nullptr; }
 
-    N_    = pars.N;
-    Lbox_ = pars.Lbox;
-    dim_  = pars.dim;
-    norm_ = pars.norm;    // Might create a header entry for this 
-    nthr_ = pars.nthr;
-    ds_   = pars.dt;
-    verb_ = pars.verb;
+    N_      = pars.N;
+    Lbox_   = pars.Lbox;
+    dim_    = pars.dim;
+    norm_   = pars.norm;    // Might create a header entry for this 
+    nthr_   = pars.nthr;
+    ds_     = pars.dt;
+    nsteps_ = pars.nsteps;
+    verb_   = pars.verb;
 
     fft_backend_ = std::make_unique<FFTWOpenMPBackend>
                    (dim_, N_, Lbox_, pars.plan, verb_, nthr_);
@@ -46,7 +47,7 @@ void Field::init(const Params& pars)
 
 Field::Field()
     : N_(0), dim_(0), nthr_(0), Lbox_(0.0), ds_(0.0), sites_(0), ksites_(0),
-      psi_(nullptr), Vhat_(nullptr), V_(nullptr) {}// k2_(nullptr) {}     
+      psi_(nullptr), Vhat_(nullptr), V_(nullptr) {}     
 
 Field::Field(const Params& p)
     : Field()
@@ -317,6 +318,11 @@ void Field::updatePotential()
     Vmax_ = local_max;  
 }
 
+
+void Field::updateTime()
+{
+    curr_ += 1;
+}
 
 void Field::propagate()
 {

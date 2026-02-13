@@ -20,14 +20,13 @@ im = None
 
 for fname in files:
     with h5.File(fname, "r") as f:
-        #psi_real = f["/psi/real"][:]
-        #psi_imag = f["/psi/imag"][:]
-        #psi_c = psi_real + 1j * psi_imag
-        #density = np.abs(psi_c)**2
         density = np.array(f['/rho/data'])
+        dim = int(f['Header'].attrs['dim'])
 
     me = np.mean(density)
     rho = density / me
+    if dim == 3:
+        rho = np.mean(rho, axis=0)
 
     logdens = np.log10(rho)
 

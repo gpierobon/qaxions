@@ -26,6 +26,7 @@ class Field
         void Poisson();
         void updatePotential();
         void computeEnergy();
+        void updateTime();
         void propagate();
 
         const fftw_complex* psi() const { return psi_; }   
@@ -49,6 +50,8 @@ class Field
         double Vmax() const { return Vmax_; }
         double rhomax() const { return rhomax_; }
         bool   verb()  const { return verb_;}
+        int   curr()  const { return curr_;}
+        int   nsteps()  const { return nsteps_;}
 
 
     private:
@@ -60,6 +63,9 @@ class Field
         double norm_;
         
         bool verb_;
+
+        int curr_ = 0;
+        int nsteps_ = 0;
 
         double ds_;           // Code time step
         double s_;            // s-time

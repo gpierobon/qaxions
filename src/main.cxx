@@ -10,6 +10,7 @@
 #include "parse.h"
 #include "utils.h"
 #include "field.h"
+#include "meas.h"
 #include "io/io.h"
 #include "ic/ic.h"
 #include "profiler.h"
@@ -59,19 +60,10 @@ int main( int argc, char* argv[] )
     size_t nmeas  = static_cast<size_t>(pars.nmeas);
     std::vector<size_t> mlist = generateMeasList(nsteps, nmeas);
 
-    // Dump ICs
-    std::ostringstream icf;
-    icf << pars.dir <<  "/field_0000.h5";
-    field->computeEnergy();
-    auto dur = Clock::now() - start;
-    printStatus(*field, 0, nsteps, measn, dur);
-    IO io(icf.str());
-    io.writeConf(*field, true);
-    io.close();
-
-    // Set the potential
+    measure(*field, pars, 0, start); 
     field->updatePotential();
 
+    std::cout << "\nStarting time loop ... \n" << std::endl;
     for (size_t idx=0; idx<nsteps; ++idx) 
     {
         field->propagate();
@@ -80,15 +72,7 @@ int main( int argc, char* argv[] )
         {
             ++measn; ++next_meas;
             auto dur = Clock::now() - start;
-            printStatus(*field, idx, nsteps, measn, dur);
-
-            std::ostringstream fname;
-            fname << pars.dir <<  "/field_" 
-                  << std::setw(4) << std::setfill('0') << measn << ".h5";
-
-            field->computeEnergy();
-            IO io_tmp(fname.str());
-            io_tmp.writeConf(*field);
+            measure(*field, pars, measn, start); 
         }
     }
     
