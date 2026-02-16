@@ -9,6 +9,11 @@ enum class ICType
     SPECTRUM
 };
 
+enum class CosmoType
+{
+    STATIC,
+    MRE
+};
 
 enum class FFTPlanType
 {

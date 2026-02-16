@@ -30,7 +30,6 @@ class FFTWOpenMPBackend : public FFTBackend
     private:
         int dim_;
         size_t N_;
-        double Lbox_;
         int nthr_;
         unsigned plan_flags_;
         size_t sites_;
@@ -54,9 +53,9 @@ class FFTWOpenMPBackend : public FFTBackend
         }
 
     public:
-        FFTWOpenMPBackend(int dim, size_t N, double Lbox, 
+        FFTWOpenMPBackend(int dim, size_t N, 
                       FFTPlanType plan_type, bool verbose, int nthr)
-        : dim_(dim), N_(N), Lbox_(Lbox), nthr_(nthr), plan_flags_(setPlan(plan_type))
+        : dim_(dim), N_(N), nthr_(nthr), plan_flags_(setPlan(plan_type))
         {
             if (dim_ != 2 && dim_ != 3)
                 throw std::invalid_argument("Dimension must be 2 or 3");

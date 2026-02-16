@@ -23,7 +23,7 @@ for fname in files:
         density = np.array(f['/rho/data'])
         N = int(f['Header'].attrs['N'])
         dim = int(f['Header'].attrs['dim'])
-        time = float(f['Header'].attrs['time'])
+        a = float(f['Header'].attrs['a'])
 
     me = np.mean(density)
     rho = density / me
@@ -48,7 +48,7 @@ for fname in files:
     else:
         im.set_data(logdens)
 
-    ax.set_title(r'$s = %.4f$'%time)
+    ax.set_title(r'$a = %.4f$'%a)
     plt.pause(speed)   # controls playback speed
 
 plt.ioff()

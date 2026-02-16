@@ -17,15 +17,15 @@ void defaults(Params& pars)
     pars.nsteps = 10;
     pars.nmeas = 20;
     pars.norm = 4000;
+    pars.sol_bkg = 1.0;
     pars.verb = false;
     pars.readj = false;
 
     pars.dir = "output";
 
-    pars.ictype = ICType::SOLITONS,
-    pars.plan = FFTPlanType::ESTIMATE;
+    pars.ictype = ICType::SOLITONS;
+    pars.cosmotype = CosmoType::STATIC;
     pars.measinfo = MeasureType::NONE;
-
 }
 
 void printHelp()
@@ -105,6 +105,17 @@ void parseArgs(int argc, char* argv[], Params* pars)
             else
             {
                 std::cerr << "Invalid --fft value: " << val << " (must be 0-3)\n";
+                std::exit(1);
+            }
+        }
+        else if (arg == "--cosmo" && i+1 < argc)
+        {
+            int val = std::atoi(argv[++i]);
+            if (val >= 0 && val <= 1)
+                pars->cosmotype = static_cast<CosmoType>(val);
+            else
+            {
+                std::cerr << "Invalid --cosmo value: " << val << " (must be 0-1)\n";
                 std::exit(1);
             }
         }

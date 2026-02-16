@@ -14,10 +14,11 @@ class Field
 {
     public:
 
-        void init(const Params& pars);
+        void init(Params& pars);
+        void setCosmo(Params& pars);
 
         Field();
-        explicit Field(const Params& pars);
+        explicit Field(Params& pars);
         ~Field();
 
         void kick(double dt);
@@ -52,7 +53,9 @@ class Field
         bool   verb()  const { return verb_;}
         int   curr()  const { return curr_;}
         double time()  const { return s_;}
+        double a()  const { return a_;}
         int   nsteps()  const { return nsteps_;}
+        int   cosmo()  const { return cosmo_;}
 
 
     private:
@@ -62,12 +65,14 @@ class Field
         int nthr_;
         double Lbox_;
         double norm_;
+        double rho_mean_;
         
         bool verb_;
 
         int curr_ = 0;
         int nsteps_ = 0;
 
+        int cosmo_;
         double ds_;           // Code time step
         double s_;            // s-time
         double a_;            // Scale factor

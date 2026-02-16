@@ -9,6 +9,7 @@
 #include "../field.h"
 #include "../profiler.h"
 
+#define SQRT2 1.41421356237
 
 IO::IO(const std::string& filename, FileMode mode)
 {
@@ -260,12 +261,14 @@ void IO::readJaxions(Params& pars, Field& field)
     readDataset(imag.data(), H5T_NATIVE_DOUBLE, "/v");
 
     fftw_complex* psi = field.psi();
+    double ai = 0.01;
+    double pref = std::pow(ai, 1.5) / SQRT2; 
 
     #pragma omp parallel for
     for (size_t i = 0; i < field.sites(); ++i)
     {
-        psi[i][0] = real[i]; // To add the normalisation
-        psi[i][1] = imag[i];
+        psi[i][0] = pref  * real[i];
+        psi[i][1] = -pref * imag[i];
     }
 }
 
@@ -314,7 +317,9 @@ void IO::writeConf(const Field& field, bool save_psi)
     const int N = field.size();
     const int dim = field.dim();
     const int curr = field.curr();
+    const double Lbox = field.Lbox();
     const double time = field.time();
+    const double a = field.a();
     const size_t sites = field.sites();
 
     std::array<hsize_t,3> dims;
@@ -358,7 +363,8 @@ void IO::writeConf(const Field& field, bool save_psi)
     writeAttribute<int>   ("Header", "dim",   dim);
     writeAttribute<int>   ("Header", "step",  curr);
     writeAttribute<double>("Header", "time",  time);
-    writeAttribute<double>("Header", "Lbox",  field.Lbox());
+    writeAttribute<double>("Header", "a",     a);
+    writeAttribute<double>("Header", "Lbox",  Lbox);
 
 }
 

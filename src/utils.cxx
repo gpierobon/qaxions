@@ -68,18 +68,20 @@ void printStatus(const Field& f, int step, size_t num_steps, int meas,
     std::string time_str = formatDuration(dur);
 
     double rhomax = f.rhomax();
+    double a = f.a();
 
     std::cout << "============================================================="
-              << "=========================\n";
+              << "=====================================\n";
     std::cout << std::fixed    <<  std::setprecision(1)
               << std::setw(6)  << "Meas #"    << std::setw(4) << meas 
-              << std::fixed    <<  std::setprecision(5)
-              << std::setw(2)  << " |   max(ρ): "
+              << std::setw(2)  << " |   a: "
+              << std::setw(8) << std::setprecision(4) << a
+              << std::setw(2)  << " |   max(δ): "
               << std::setw(12) << std::setprecision(5) << rhomax
               << std::setw(4)  << "    |  "        << std::setw(6) << std::setprecision(1) << percent << "%"
               << std::setw(12) << "Walltime:"  << " " << std::setw(12) << time_str << std::endl;
     std::cout << "============================================================="
-              << "=========================\n";
+              << "=====================================\n";
 }
 
 

@@ -71,7 +71,6 @@ int main( int argc, char* argv[] )
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
-            auto dur = Clock::now() - start;
             measure(*field, pars, measn, start); 
         }
     }

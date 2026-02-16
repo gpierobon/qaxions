@@ -56,7 +56,7 @@ void SolitonsIC::apply(Field& field) const
         std::cout << "[IC solitons] Grid loop ..." << std::endl;
     }
 
-    double bkg = 0.5;
+    double bkg = p_.sol_bkg;
     std::vector<double> rho(sites, bkg);
     double rho_sum = 0.0;
 

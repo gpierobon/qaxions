@@ -20,6 +20,7 @@ typedef struct
     int nsteps;
     int nmeas;
     double norm;
+    double sol_bkg;
 
     bool verb;
     bool readj;
@@ -27,6 +28,7 @@ typedef struct
     std::string dir;
 
     ICType ictype;
+    CosmoType cosmotype;
     FFTPlanType plan; 
     MeasureType measinfo;
 

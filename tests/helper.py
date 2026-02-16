@@ -32,7 +32,7 @@ def get_solitons(N, filename='solitons.txt'):
     xlin = xlin[0:N]
     xx, yy = np.meshgrid(xlin, xlin)
 
-    rho = np.ones_like(xx)*0.5
+    rho = np.ones_like(xx)*1.0
 
     for amp, sigma, x_c, y_c, z_c, norm in solitons:
         r2 = (xx - x_c) ** 2 + (yy - y_c) ** 2
@@ -58,7 +58,7 @@ def get_solitons_3D(N, filename='solitons.txt'):
     xlin = xlin[0:N]
     xx, yy, zz = np.meshgrid(xlin, xlin, xlin, indexing='ij')
 
-    rho = np.ones_like(xx) * 0.5
+    rho = np.ones_like(xx) * 1.0
 
     for amp, sigma, x_c, y_c, z_c, norm in solitons:
         r2 = ((xx - x_c)**2 +

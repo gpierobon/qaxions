@@ -32,7 +32,7 @@ class IO
 
     private:
         hid_t file_id_;
-        bool append_mode_;
+        //bool append_mode_;
 
         template<typename T>
         T readAttribute(const std::string& group_name, 

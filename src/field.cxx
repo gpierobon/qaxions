@@ -10,8 +10,7 @@
 #include "profiler.h"
 #include "fft/fft.h"
 
-
-void Field::init(const Params& pars)
+void Field::init(Params& pars)
 {
     PROFILE(FIELD);
 
@@ -22,17 +21,15 @@ void Field::init(const Params& pars)
     N_      = pars.N;
     Lbox_   = pars.Lbox;
     dim_    = pars.dim;
-    norm_   = pars.norm;    // Might create a header entry for this 
     
     nthr_   = pars.nthr;
     nsteps_ = pars.nsteps;
     verb_   = pars.verb;
 
-    s_      = 0;
-    ds_     = pars.dt;
+    setCosmo(pars);
 
     fft_backend_ = std::make_unique<FFTWOpenMPBackend>
-                   (dim_, N_, Lbox_, pars.plan, verb_, nthr_);
+                   (dim_, N_, pars.plan, verb_, nthr_);
 
     sites_  = fft_backend_->sites();
     ksites_ = fft_backend_->ksites();
@@ -52,7 +49,7 @@ Field::Field()
     : N_(0), dim_(0), nthr_(0), Lbox_(0.0), ds_(0.0), sites_(0), ksites_(0),
       psi_(nullptr), Vhat_(nullptr), V_(nullptr) {}     
 
-Field::Field(const Params& p)
+Field::Field(Params& p)
     : Field()
 {
     init(p);
@@ -68,6 +65,30 @@ Field::~Field()
     fftw_cleanup_threads();
 }
 
+void Field::setCosmo(Params& p)
+{
+    CosmoType ctype = p.cosmotype;
+    switch (ctype)
+    {
+        case CosmoType::STATIC:
+            cosmo_ = 0;
+            a_ = 1.0;
+            s_ = 0;
+            ds_ = p.dt;
+            rho_mean_ = 1.0;
+            norm_ = 4 * M_PI * p.norm;
+            break;
+
+        case CosmoType::MRE:
+            cosmo_ = 1;
+            a_ = p.ai;
+            ds_ = p.dt/a_;
+            rho_mean_ = 1.5 * (2.0 * M_PI) * (2.0 * M_PI) * 1.27 * 1.27;
+            norm_ = 1.0;
+            //s_ = getTime(a_); // TO IMPLEMENT
+            break;
+    }
+}
 
 void Field::kick(double dt)
 {
@@ -193,13 +214,16 @@ void Field::computeEnergy()
         std::cout << "[computeEnergy] done ..." << std::endl;
 
     double local_max = 0.0;
-    #pragma omp parallel for simd reduction(max:local_max)
+    double local_sum = 0.0;
+    #pragma omp parallel for reduction(max:local_max) reduction(+:local_sum)
     for (size_t i = 0; i < sites_; ++i)
     {
         double absV = std::abs(V_[i]);
         if (absV > local_max) local_max = absV;
+        local_sum += absV;
     }
-    rhomax_ = local_max;  
+    double avg = local_sum / static_cast<double>(sites_);
+    rhomax_ = local_max / avg;  
 }
 
 
@@ -271,13 +295,13 @@ void Field::updatePotential()
 {
     PROFILE(POISSON);
 
-    const double pref = 4.0 * M_PI * norm_;
+    const double pref = norm_ * a_;
 
     #pragma omp parallel for simd //schedule(static)
     for (size_t i=0; i < sites_; ++i) 
     {
         double rho = psi_[i][0] * psi_[i][0] + psi_[i][1] * psi_[i][1];
-        V_[i] = pref * (rho - 1.0);
+        V_[i] = pref * (rho - rho_mean_);
     }
     
     if (verb_)
@@ -312,7 +336,7 @@ void Field::updatePotential()
         std::cout << "[updatePotential] c2r backward done!" << std::endl;
 
     double local_max = 0.0;
-    #pragma omp parallel for simd reduction(max:local_max)
+    #pragma omp parallel for reduction(max:local_max)
     for (size_t i = 0; i < sites_; ++i)
     {
         double absV = std::abs(V_[i]);
@@ -324,7 +348,15 @@ void Field::updatePotential()
 
 void Field::updateTime()
 {
-    curr_ += 1;
+    // Get ctype??
+    curr_ += 1; 
+
+    if (cosmo_ == 1)
+    {
+        ds_ = 0.00025/a_;
+        a_  = a_ * (1 + 1.27 * 1.27 * std::sqrt(1 + a_ ) * ds_);
+    }
+    
     s_ += ds_;
 }
 

@@ -19,10 +19,10 @@ def test_read_jaxions(idx):
 
     # C++ read 
     psi_c = h.test_read_jaxions(idx)
-
+    norm = 0.1**(3/2)/np.sqrt(2)
     # python read 
     with h5.File('jaxions_2D.hdf5', 'r') as f:
-        m_data = f['m'][:]
+        m_data = f['m'][:]*norm
 
     expected = m_data.flat[idx]
     assert psi_c == pytest.approx(expected, abs=1e-5, rel=1e-4)
