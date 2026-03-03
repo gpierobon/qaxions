@@ -21,9 +21,9 @@ im = None
 for fname in files:
     with h5.File(fname, "r") as f:
         density = np.array(f['/rho/data'])
-        N = int(f['Header'].attrs['N'])
-        dim = int(f['Header'].attrs['dim'])
-        a = float(f['Header'].attrs['a'])
+        N = int(f['Header'].attrs['N'][0])
+        dim = int(f['Header'].attrs['dim'][0])
+        a = float(f['Header'].attrs['a'][0])
 
     me = np.mean(density)
     rho = density / me

@@ -126,7 +126,7 @@ void Field::drift(double dt)
     const int hN     = N_ / 2;
 
     if (verb_)
-        std::cout << "[Step: " << curr_ << ", drift] Applying c2c forward ..." << std::endl;
+        std::cout << "[drift] Applying c2c forward ..." << std::endl;
 
     {
         PROFILE(FFT)
@@ -362,11 +362,18 @@ void Field::updateTime()
 
 void Field::propagate()
 {
+    if (verb_)
+        std::cout << "\n[Step: " << curr_ << "] =================" 
+                  << "============================= " << std::endl;
+
     kick(0.5 * ds_);
     drift(ds_);
     updateTime();
     updatePotential();
     kick(0.5 * ds_);
+    if (verb_)
+        std::cout << "==========================================" 
+                  << "==============\n" << std::endl;
 }
 
 
