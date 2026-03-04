@@ -1,0 +1,6 @@
+numpy
+h5py
+pytest 
+pybind11
+matplotlib
+cmasher

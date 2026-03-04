@@ -10,6 +10,12 @@ BIN_DIR    := bin
 SCRIPT_DIR := scripts
 
 # ------------------------------------------------------------------------------
+# Optional Python bindings
+# ------------------------------------------------------------------------------
+
+WITH_PYTHON ?= 1
+
+# ------------------------------------------------------------------------------
 #  Platform detection
 # ------------------------------------------------------------------------------
 
@@ -38,10 +44,22 @@ OPT    := -O3 -g -Wall -Wextra -Wno-unknown-pragmas
 # ------------------------------------------------------------------------------
 
 PYTHON        := python3
-PYBIND_INCL   := $(shell $(PYTHON) -m pybind11 --includes)
-PY_LDFLAGS    := $(shell $(PYTHON)-config --ldflags)
-EXT_SUFFIX    := $(shell $(PYTHON) -c "import sysconfig; \
-                   print(sysconfig.get_config_var('EXT_SUFFIX'))")
+
+ifeq ($(WITH_PYTHON),1)
+
+    PYBIND_CHECK := $(shell $(PYTHON) -m pybind11 --includes 2>/dev/null)
+
+    ifeq ($(PYBIND_CHECK),)
+        $(warning pybind11 not found — disabling Python module build)
+        WITH_PYTHON := 0
+    else
+        PYBIND_INCL := $(PYBIND_CHECK)
+        PY_LDFLAGS  := $(shell $(PYTHON)-config --ldflags)
+        EXT_SUFFIX  := $(shell $(PYTHON) -c "import sysconfig; \
+                           print(sysconfig.get_config_var('EXT_SUFFIX'))")
+    endif
+
+endif
 
 $(shell mkdir -p $(PY_PKG_DIR))
 $(shell touch $(PY_PKG_DIR)/__init__.py)
@@ -94,8 +112,11 @@ endif
 CXXFLAGS := \
     $(STD) $(OPT) \
     $(OPENMP_CXX) $(OPENMP_INC) \
-    $(HDF5_INC) $(FFTW_INC) \
-    $(PYBIND_INCL)
+    $(HDF5_INC) $(FFTW_INC)
+
+ifeq ($(WITH_PYTHON),1)
+    CXXFLAGS += $(PYBIND_INCL)
+endif
 
 LIBS := \
     $(OPENMP_LIB) \
@@ -128,7 +149,14 @@ $(shell mkdir -p $(sort $(dir $(OBJS) $(PYBIND_OBJS))) >/dev/null 2>&1)
 
 .PHONY: all clean info run
 
-all: $(EXEC) $(PYBIND_MODS) $(BIN_DIR)/qaxi
+ifeq ($(WITH_PYTHON),1)
+    ALL_PY := $(PYBIND_MODS)
+else
+    ALL_PY :=
+endif
+
+
+all: $(EXEC) $(ALL_PY) $(BIN_DIR)/qaxi
 
 $(EXEC): $(OBJS)
 	$(LINKER) $(OBJS) $(LIBS) -o $@
@@ -166,6 +194,7 @@ info:
 	@echo "Platform      = $(PLATFORM)"
 	@echo "CXX           = $(CXX)"
 	@echo "Python        = $(PYTHON)"
+	@echo "WITH_PYTHON   = $(WITH_PYTHON)"
 	@echo "EXT_SUFFIX    = $(EXT_SUFFIX)"
 	@echo "CXXFLAGS      = $(CXXFLAGS)"
 	@echo "LIBS          = $(LIBS)"

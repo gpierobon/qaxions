@@ -5,6 +5,8 @@ pyqaxions
 build/
 bin/
 output/
+o0/
+o1/
 tests/__pycache__
 .DS_Store
 

@@ -8,6 +8,25 @@ nav_order: 1
 
 `qaxions` is a C++ project to solve the Schrödinger-Poisson system of equations on a 2D/3D lattice.
 
+[View it on GitLab][gitlab repo]{: .btn} 
+
+## Overview
+
+- Static Universe simulations to study the soliton interaction via gravity
+- Axion star/minicluster formation around matter-radiation equality
+- Fuzzy dark matter cosmological simulations 
+- Interface with [jaxions][jaxions repo] 
+
+Details on the physics of $$ \texttt{jaxions} $$ are found [here]({% link install.md %}).
+
+## Obtain the code
+
+To download the source code from the public repository use:
+
+```
+git clone https://gitlab.com/gpierobon/jaxions.git
+```
+
 ## Features
 
 - High-performance C++ core
@@ -30,3 +49,9 @@ nav_order: 1
 ├── Makefile
 └── README.md
 ```
+
+
+
+[gitlab repo]: https://gitlab.com/gpierobon/qaxions.git
+[github repo]: https://github.com/gpierobon/qaxions.git
+[jaxions repo]: https://github.com/veintemillas/jaxions.git
