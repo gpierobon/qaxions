@@ -20,3 +20,5 @@ texput.log
 bench3D/
 
 scripts/vista*
+
+docs/_site/
