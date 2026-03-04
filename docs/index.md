@@ -17,14 +17,12 @@ nav_order: 1
 - Fuzzy dark matter cosmological simulations 
 - Interface with [jaxions][jaxions repo] 
 
-Details on the physics of $$ \texttt{jaxions} $$ are found [here]({% link install.md %}).
-
 ## Obtain the code
 
 To download the source code from the public repository use:
 
 ```
-git clone https://gitlab.com/gpierobon/jaxions.git
+git clone https://gitlab.com/gpierobon/qaxions.git
 ```
 
 ## Features
