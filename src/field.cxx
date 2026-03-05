@@ -360,6 +360,31 @@ void Field::updateTime()
     s_ += ds_;
 }
 
+void Field::half_kick()
+{
+    if (verb_)
+        std::cout << "Half-kick!" << std::endl;
+    kick(0.5 * ds_);
+}
+
+void Field::full_kick()
+{
+    kick(ds_);
+    if (verb_)
+        std::cout << "==========================================" 
+                  << "==============\n" << std::endl;
+}
+
+void Field::drift_update()
+{
+    if (verb_)
+        std::cout << "\n[Step: " << curr_ << "] =================" 
+                  << "============================= " << std::endl;
+    drift(ds_);
+    updateTime();
+    updatePotential();
+}
+
 void Field::propagate()
 {
     if (verb_)

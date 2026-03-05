@@ -28,6 +28,9 @@ class Field
         void updatePotential();
         void computeEnergy();
         void updateTime();
+        void half_kick();
+        void full_kick();
+        void drift_update();
         void propagate();
 
         const fftw_complex* psi() const { return psi_; }   

@@ -64,16 +64,24 @@ int main( int argc, char* argv[] )
     field->updatePotential();
 
     std::cout << "\nStarting time loop ... \n" << std::endl;
-    for (size_t idx=0; idx<nsteps; ++idx) 
+    
+    field->half_kick(); // Offset kicks
+    for (size_t idx = 0; idx < nsteps; ++idx)
     {
-        field->propagate();
-
+        field->drift_update();
+        
+        // measure after drift (positions at integer time)
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
-            measure(*field, pars, measn, start); 
+            measure(*field, pars, measn, start);
         }
+
+        // full kick except maybe last step
+        if (idx != nsteps - 1)
+            field->full_kick();
     }
+    field->half_kick(); // Final kick
     
     std::cout << "\nSimulation complete. " 
               << nmeas << " outputs saved" << std::endl;
