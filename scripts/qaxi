@@ -1,6 +1,20 @@
 #!/bin/bash
 
-DATA_DIR="${1:output}"
-PAUSE="${2:-0.1}"
+TYPE="${1:-dens}"
+DATA_DIR="${2:-output}"
+PAUSE="${3:-0.1}"
 
-python3 "scripts/plot_density.py" "$DATA_DIR" "$PAUSE"
+echo "TYPE=$TYPE DATA_DIR=$DATA_DIR PAUSE=$PAUSE"
+
+case $TYPE in 
+
+    dens)
+        python3 "scripts/plot_density.py" "$DATA_DIR" "$PAUSE"
+    ;;
+
+    spec)
+        python3 "scripts/plot_spectrum.py" "$DATA_DIR" "$PAUSE"
+    ;;
+
+esac
+

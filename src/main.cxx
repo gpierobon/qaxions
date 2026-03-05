@@ -13,6 +13,7 @@
 #include "meas.h"
 #include "io/io.h"
 #include "ic/ic.h"
+#include "spectrum/spectrum.h"
 #include "profiler.h"
 
 

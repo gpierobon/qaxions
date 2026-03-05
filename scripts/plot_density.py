@@ -11,6 +11,11 @@ data_dir = sys.argv[1]
 speed    = float(sys.argv[2])
 pattern = os.path.join(data_dir, "field_*.h5")
 files = sorted(glob.glob(pattern))
+
+if len(files) < 1:
+    print(f"No field files found (set --meas 8!)")
+    exit(0)
+
 print(f"Found {len(files)} field files")
 
 plt.ion()

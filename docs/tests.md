@@ -4,11 +4,24 @@ title: Building & Testing
 nav_order: 3
 ---
 
-# Building & Testing
+# Building 
 
-From the repository root, run:
+Once all the dependencies are installed and ready to be found, to build the code
+simply run from the root directory:
+
+```
+make
+```
+
+In order to disable the python tests and pybind, run:
+
+```
+make WITH_PYTHON=0
+```
+
+
+# Testing
 
 ```bash
-make
 pytest -v tests/
 ```

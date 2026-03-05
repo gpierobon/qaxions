@@ -99,6 +99,6 @@ It is strongly recommended to use a virtual environment to build tests and for v
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install pybind11 pytest numpy h5py
+pip install -r requirements.txt
 ```
 

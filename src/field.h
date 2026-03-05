@@ -44,6 +44,8 @@ class Field
 
         fftw_complex* Vhat()     { return Vhat_; }
         
+        FFTBackend* fftBackend() const { return fft_backend_.get(); }
+
         int size() const { return N_; }
         int dim()  const { return dim_; }
         double Lbox() const { return Lbox_; }
@@ -53,6 +55,7 @@ class Field
 
         double Vmax() const { return Vmax_; }
         double rhomax() const { return rhomax_; }
+        double rho_mean() const { return rho_mean_; }
         bool   verb()  const { return verb_;}
         int   curr()  const { return curr_;}
         double time()  const { return s_;}
