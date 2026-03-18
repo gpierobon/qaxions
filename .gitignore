@@ -22,5 +22,9 @@ texput.log
 bench3D/
 
 scripts/vista*
+scripts/.ipynb_checkpoints/
 
 docs/_site/
+
+perf.*
+massif.*

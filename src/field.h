@@ -10,6 +10,11 @@
 #include "parse.h"
 #include "fft/fft.h"
 
+#ifdef USE_GPU
+#include <cuda_runtime.h>
+#include <cufft.h>
+#endif
+
 class Field 
 {
     public:
@@ -43,6 +48,11 @@ class Field
         double getVIdx(int idx) const { return V_[idx]; }
 
         fftw_complex* Vhat()     { return Vhat_; }
+#ifdef USE_GPU
+        cufftDoubleComplex* devicePsi()  { return d_psi_;  }
+        cufftDoubleReal*    deviceV()    { return d_V_;    }
+        cufftDoubleComplex* deviceVhat() { return d_Vhat_; }
+#endif
         
         FFTBackend* fftBackend() const { return fft_backend_.get(); }
 
@@ -62,6 +72,14 @@ class Field
         double a()  const { return a_;}
         int   nsteps()  const { return nsteps_;}
         int   cosmo()  const { return cosmo_;}
+
+#ifdef USE_GPU
+        void allocGPU();
+        void freeGPU();
+        void toDevice(); // Host to device
+        void toHost();   // Device to host
+        void syncVhatToHost(); // For spectrum
+#endif
 
 
     private:
@@ -92,6 +110,12 @@ class Field
         fftw_complex* psi_;
         fftw_complex* Vhat_;
         double*       V_;      
+
+#ifdef USE_GPU
+        cufftDoubleComplex* d_psi_;
+        cufftDoubleComplex* d_Vhat_;
+        cufftDoubleReal*    d_V_;
+#endif
         
         std::unique_ptr<FFTBackend> fft_backend_;
 };

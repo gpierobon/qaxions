@@ -10,6 +10,10 @@
 #include "profiler.h"
 #include "fft/fft.h"
 
+#ifdef USE_GPU
+    #include "fft/fft_cuda.h"
+#endif
+
 void Field::init(Params& pars)
 {
     PROFILE(FIELD);
@@ -28,8 +32,13 @@ void Field::init(Params& pars)
 
     setCosmo(pars);
 
+#ifdef USE_GPU
+    fft_backend_ = makeCUFFTBackend(dim_, N_, verb_);
+    //fft_backend_ = std::make_unique<CUFFTBackend>(dim_, N_, verb_);
+#else
     fft_backend_ = std::make_unique<FFTWOpenMPBackend>
                    (dim_, N_, pars.plan, verb_, nthr_);
+#endif
 
     sites_  = fft_backend_->sites();
     ksites_ = fft_backend_->ksites();
@@ -43,6 +52,11 @@ void Field::init(Params& pars)
 
     if (verb_)
         printMemoryUsage();
+
+#ifdef USE_GPU
+    freeGPU();
+    allocGPU();
+#endif
 }
 
 Field::Field()
@@ -58,11 +72,16 @@ Field::Field(Params& p)
 
 Field::~Field()
 {
+
+#ifdef USE_GPU
+    freeGPU();
+#endif
     fft_backend_.reset();
     if (psi_)  fftw_free(psi_);
     if (V_)    fftw_free(V_);
     if (Vhat_) fftw_free(Vhat_);
     fftw_cleanup_threads();
+
 }
 
 void Field::setCosmo(Params& p)
@@ -131,7 +150,11 @@ void Field::drift(double dt)
     {
         PROFILE(FFT)
         FLOP_COUNT(0, 32);
+#ifdef USE_GPU
+        fft_backend_->forward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+#else
         fft_backend_->forward_c2c(psi_);
+#endif
     }
 
     if (verb_)
@@ -190,7 +213,11 @@ void Field::drift(double dt)
     {
         PROFILE(FFT)
         FLOP_COUNT(0, 32);
+#ifdef USE_GPU
+        fft_backend_->backward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+#else
         fft_backend_->backward_c2c(psi_);
+#endif
     }
 
     if (verb_)
@@ -309,7 +336,12 @@ void Field::updatePotential()
     {
         PROFILE(FFT)
         FLOP_COUNT(0, 32);
+#ifdef USE_GPU
+        fft_backend_->forward_r2c(reinterpret_cast<double*>(d_V_),
+                                  reinterpret_cast<fftw_complex*>(d_Vhat_));
+#else
         fft_backend_->forward_r2c(V_, Vhat_);
+#endif
     }
 
     if (verb_)
@@ -329,7 +361,12 @@ void Field::updatePotential()
     {
         PROFILE(FFT)
         FLOP_COUNT(0, 32);
+#ifdef USE_GPU
+        fft_backend_->backward_c2r(reinterpret_cast<fftw_complex*>(d_Vhat_),
+                                   reinterpret_cast<double*>(d_V_));
+#else
         fft_backend_->backward_c2r(Vhat_, V_);
+#endif
     }
 
     if (verb_)

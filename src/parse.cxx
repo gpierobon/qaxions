@@ -23,6 +23,7 @@ void defaults(Params& pars)
 
     pars.dir = "output";
 
+    pars.plan = FFTPlanType::ESTIMATE;
     pars.ictype = ICType::SOLITONS;
     pars.cosmotype = CosmoType::STATIC;
     pars.measinfo = MeasureType::NONE;

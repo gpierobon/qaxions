@@ -32,14 +32,15 @@ class Spectrum
         const std::vector<double>& kmodes() const { return k_;     }
 
     private:
-        int             N_;
-        int             dim_;
-        double          Lbox_;
-        double          a_;
-        double          rho_mean_;
-        size_t          sites_;
-        fftw_complex*   psi_;     // read-only view of Field::psi_
-        fftw_complex*   Vhat_;    // reused as scratch (borrowed from Field)
+        Field&         field_;
+        int            N_;
+        int            dim_;
+        double         Lbox_;
+        double         a_;
+        double         rho_mean_;
+        size_t         sites_;
+        fftw_complex*  psi_;     // read-only view of Field::psi_
+        fftw_complex*  Vhat_;    // reused as scratch (borrowed from Field)
         double*         V_;       // reused as scratch (borrowed from Field)
 
         //class FFTWOpenMPBackend* fft_backend_;

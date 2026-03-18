@@ -49,7 +49,7 @@ int main( int argc, char* argv[] )
         field = std::make_unique<Field>(pars);
         auto ic = createIC(pars.ictype, pars);
         ic->apply(*field);
-        std::cout << "\nField created, it took " << timeSince(start) << std::endl;
+        std::cout << "\nField created, it took " << timeSince(start) << "\n\n";
     }
 
     printParams(*field, pars);
@@ -64,6 +64,10 @@ int main( int argc, char* argv[] )
     measure(*field, pars, 0, start); 
     field->updatePotential();
 
+#ifdef USE_GPU
+    field->toDevice();
+#endif
+
     std::cout << "\nStarting time loop ... \n" << std::endl;
     
     field->half_kick(); // Offset kicks
@@ -75,6 +79,9 @@ int main( int argc, char* argv[] )
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
+#ifdef USE_GPU
+            field->toHost(); // This can be included inside measure()
+#endif
             measure(*field, pars, measn, start);
         }
 

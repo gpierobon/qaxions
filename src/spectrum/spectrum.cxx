@@ -9,7 +9,8 @@
 
 
 Spectrum::Spectrum(Field& f)
-    : N_        (f.size())
+    : field_    (f)
+    , N_        (f.size())
     , dim_      (f.dim())
     , Lbox_     (f.Lbox())
     , a_        (f.a())
@@ -45,7 +46,13 @@ void Spectrum::compute()
     //    V_[i] = (rho - rho_mean_) / rho_mean_;
     //}
 
+#ifdef USE_GPU
+    fft_backend_->forward_r2c(reinterpret_cast<double*>(field_.deviceV()),
+                              reinterpret_cast<fftw_complex*>(field_.deviceVhat()));
+    field_.syncVhatToHost();
+#else
     fft_backend_->forward_r2c(V_, Vhat_);
+#endif
 
     if (dim_ == 3)
         bin3D();

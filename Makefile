@@ -10,6 +10,16 @@ BIN_DIR    := bin
 SCRIPT_DIR := scripts
 
 # ------------------------------------------------------------------------------
+# Optional GPU
+# ------------------------------------------------------------------------------
+
+WITH_GPU ?= 0
+
+# GPU architecture — override on the command line if needed:
+#   make WITH_GPU=1 GPU_ARCH=sm_80   (A100)
+GPU_ARCH ?= sm_60
+
+# ------------------------------------------------------------------------------
 # Optional Python bindings
 # ------------------------------------------------------------------------------
 
@@ -43,7 +53,7 @@ OPT    := -O3 -g -Wall -Wextra -Wno-unknown-pragmas
 #  Python tests / pybind11
 # ------------------------------------------------------------------------------
 
-PYTHON        := python3
+PYTHON := python3
 
 ifeq ($(WITH_PYTHON),1)
 
@@ -106,6 +116,32 @@ else
 endif
 
 # ------------------------------------------------------------------------------
+#  GPU / CUDA / cuFFT
+# ------------------------------------------------------------------------------
+
+ifeq ($(WITH_GPU),1)
+    NVCC       := nvcc
+    LINKER     := nvcc
+
+    # Host-compiler flags forwarded through nvcc.
+    # OpenMP must be passed via --compiler-options so nvcc hands it to the
+    # host compiler rather than trying to interpret it itself.
+    NVCC_HOST_FLAGS := $(OPENMP_CXX)
+
+    NVCC_FLAGS := \
+        -O3 -g \
+        -arch=$(GPU_ARCH) \
+        --expt-relaxed-constexpr \
+        -std=c++17 \
+        --compiler-options "$(NVCC_HOST_FLAGS)"
+
+    # Expose GPU code paths to the host-side C++ translation units
+    GPU_DEFINES := -DUSE_GPU
+
+    GPU_LIBS := -lcudart -lcufft
+endif
+
+# ------------------------------------------------------------------------------
 #  Flags
 # ------------------------------------------------------------------------------
 
@@ -114,33 +150,65 @@ CXXFLAGS := \
     $(OPENMP_CXX) $(OPENMP_INC) \
     $(HDF5_INC) $(FFTW_INC)
 
+ifeq ($(WITH_GPU),1)
+    CXXFLAGS += $(GPU_DEFINES)
+endif
+
 ifeq ($(WITH_PYTHON),1)
     CXXFLAGS += $(PYBIND_INCL)
 endif
 
+# Pure library flags — only -l/-L entries, no compiler driver flags.
+# These are safe to pass to both g++ and nvcc directly.
 LIBS := \
-    $(OPENMP_LIB) \
     $(HDF5_LIB) \
     $(FFTW_LIB)
+
+ifeq ($(WITH_GPU),1)
+    LIBS += $(GPU_LIBS)
+endif
+
+# Flags that contain compiler-driver options (-fopenmp, -Wl,... etc.) must be
+# wrapped with -Xlinker when nvcc is the linker, otherwise nvcc rejects them.
+ifeq ($(WITH_GPU),1)
+  ifeq ($(PLATFORM),linux)
+    LINK_FLAGS := -lgomp
+  else
+    LINK_FLAGS := $(OPENMP_LIB)
+  endif
+else
+    LINK_FLAGS := $(OPENMP_LIB)
+endif
 
 # ------------------------------------------------------------------------------
 #  Sources
 # ------------------------------------------------------------------------------
 
-SRC_CPP := $(shell find $(SRC_DIR) -type f \( -name '*.cpp' -o -name '*.cxx' \)\
-	     ! -path '*/examples/*.cxx')
+SRC_CPP := $(shell find $(SRC_DIR) -type f \( -name '*.cpp' -o -name '*.cxx' \) \
+             ! -path '*/examples/*.cxx')
 
-OBJS        := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(SRC_CPP:.cpp=.o))
-OBJS        := $(OBJS:.cxx=.o)
+ifeq ($(WITH_GPU),1)
+    #SRC_CU := $(wildcard $(SRC_DIR)/*.cu)
+    SRC_CU := $(shell find $(SRC_DIR) -type f -name '*.cu')
+else
+    SRC_CU :=
+endif
+
+# Derive object paths for C++/CXX sources
+OBJS := $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(SRC_CPP:.cpp=.o))
+OBJS := $(OBJS:.cxx=.o)
+
+# Append CUDA object paths
+OBJS += $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(SRC_CU:.cu=.o))
 
 PYBIND_SRCS  := $(wildcard src/examples/*.cxx)
 PYBIND_NAMES := $(notdir $(basename $(PYBIND_SRCS)))
 PYBIND_OBJS  := $(patsubst src/%,build/%,$(PYBIND_SRCS:.cxx=.o))
 PYBIND_MODS  := $(addprefix $(PY_PKG_DIR)/,$(addsuffix $(EXT_SUFFIX),$(PYBIND_NAMES)))
 
-CORE_OBJS   := $(filter-out $(PYBIND_OBJS),$(OBJS))
+CORE_OBJS := $(filter-out $(PYBIND_OBJS),$(OBJS))
 
-# Create directories
+# Create build subdirectories up front
 $(shell mkdir -p $(sort $(dir $(OBJS) $(PYBIND_OBJS))) >/dev/null 2>&1)
 
 # ------------------------------------------------------------------------------
@@ -155,33 +223,61 @@ else
     ALL_PY :=
 endif
 
-
 all: $(EXEC) $(ALL_PY) $(BIN_DIR)/qaxi
 
 $(EXEC): $(OBJS)
-	$(LINKER) $(OBJS) $(LIBS) -o $@
+	$(LINKER) $(OBJS) $(LINK_FLAGS) $(LIBS) -o $@
+
+# ------------------------------------------------------------------------------
+#  Shared-library flags for Python extension modules
+# ------------------------------------------------------------------------------
 
 ifeq ($(PLATFORM),mac)
     PY_SHARED_FLAGS := -shared -undefined dynamic_lookup
-    PY_RPATH := -Wl,-rpath,$(BREW)/lib
+    PY_RPATH_RAW    := -Wl,-rpath,$(BREW)/lib
 else
     PY_SHARED_FLAGS := -shared
-    PY_RPATH := -Wl,-rpath,'$$ORIGIN'
+    PY_RPATH_RAW    := -Wl,-rpath,'$$ORIGIN'
+endif
+
+# Wrap rpath for nvcc the same way as LINK_FLAGS above
+ifeq ($(WITH_GPU),1)
+    PY_RPATH := $(addprefix -Xlinker ,$(PY_RPATH_RAW))
+else
+    PY_RPATH := $(PY_RPATH_RAW)
 endif
 
 $(PY_PKG_DIR)/%$(EXT_SUFFIX): build/examples/%.o $(CORE_OBJS)
-	$(LINKER) $(PY_SHARED_FLAGS) $(PY_RPATH) $^ $(LIBS) $(PY_LDFLAGS) -o $@
+	$(LINKER) $(PY_SHARED_FLAGS) $(PY_RPATH) $^ $(LINK_FLAGS) $(LIBS) $(PY_LDFLAGS) -o $@
 
+# ------------------------------------------------------------------------------
+#  Compilation rules
+# ------------------------------------------------------------------------------
+
+# C++ sources
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
 
+# CXX sources (pybind11 examples and any .cxx translation units)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cxx
 	$(CXX) $(CXXFLAGS) -fPIC -c $< -o $@
+
+# CUDA sources — compiled unconditionally; only reachable when SRC_CU is non-empty
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu
+	$(NVCC) $(NVCC_FLAGS) $(GPU_DEFINES) $(HDF5_INC) $(FFTW_INC) -Xcompiler -fPIC -c $< -o $@
+
+# ------------------------------------------------------------------------------
+#  Helper script
+# ------------------------------------------------------------------------------
 
 $(BIN_DIR)/qaxi: $(SCRIPT_DIR)/qaxi
 	mkdir -p $(BIN_DIR)
 	cp $< $@
 	chmod +x $@
+
+# ------------------------------------------------------------------------------
+#  Utility
+# ------------------------------------------------------------------------------
 
 clean:
 	rm -rf $(BUILD_DIR) $(EXEC) $(PY_PKG_DIR)/*.so
@@ -193,9 +289,13 @@ run: $(EXEC)
 info:
 	@echo "Platform      = $(PLATFORM)"
 	@echo "CXX           = $(CXX)"
+	@echo "LINKER        = $(LINKER)"
 	@echo "Python        = $(PYTHON)"
 	@echo "WITH_PYTHON   = $(WITH_PYTHON)"
+	@echo "WITH_GPU      = $(WITH_GPU)"
+	@echo "GPU_ARCH      = $(GPU_ARCH)"
 	@echo "EXT_SUFFIX    = $(EXT_SUFFIX)"
 	@echo "CXXFLAGS      = $(CXXFLAGS)"
+	@echo "NVCC_FLAGS    = $(NVCC_FLAGS)"
 	@echo "LIBS          = $(LIBS)"
-
+	@echo "LINK_FLAGS    = $(LINK_FLAGS)"

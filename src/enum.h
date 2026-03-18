@@ -32,7 +32,9 @@ enum class ProfType
     FIELD,
     DRIFT,
     KICK,
-    POISSON
+    POISSON,
+    GPU_H2D, 
+    GPU_D2H
 };
 
 

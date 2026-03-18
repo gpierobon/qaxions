@@ -74,6 +74,8 @@ inline void initProfilers()
     gProfilers[ProfType::KICK]    = std::make_unique<Profiler>("Kick");
     gProfilers[ProfType::POISSON] = std::make_unique<Profiler>("Poisson");
     gProfilers[ProfType::FIELD]   = std::make_unique<Profiler>("Field");
+    gProfilers[ProfType::GPU_H2D] = std::make_unique<Profiler>("Transfer: H2D");
+    gProfilers[ProfType::GPU_D2H] = std::make_unique<Profiler>("Transfer: D2H");
 }
 
 
@@ -95,7 +97,9 @@ inline void printProfStats(const Params& p, Clock::time_point sim_start)
                        ProfType::POISSON,
                        ProfType::IO,
                        ProfType::IC,
-                       ProfType::FIELD
+                       ProfType::FIELD,
+                       ProfType::GPU_H2D,
+                       ProfType::GPU_D2H
                       })
     {
         double prof_time = 0.0;
