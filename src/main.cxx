@@ -64,9 +64,9 @@ int main( int argc, char* argv[] )
     measure(*field, pars, 0, start); 
     field->updatePotential();
 
-#ifdef USE_GPU
-    field->toDevice();
-#endif
+//#ifdef USE_GPU
+//    field->toDevice();
+//#endif
 
     std::cout << "\nStarting time loop ... \n" << std::endl;
     
@@ -79,9 +79,9 @@ int main( int argc, char* argv[] )
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
-#ifdef USE_GPU
-            field->toHost(); // This can be included inside measure()
-#endif
+//#ifdef USE_GPU
+//            field->toHost(); // This can be included inside measure()
+//#endif
             measure(*field, pars, measn, start);
         }
 

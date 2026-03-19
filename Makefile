@@ -24,6 +24,10 @@ GPU_ARCH ?= sm_60
 # ------------------------------------------------------------------------------
 
 WITH_PYTHON ?= 1
+ifeq ($(WITH_GPU), 1)
+	WITH_PYTHON = 0
+        $(warning GPU (nvcc) build — disabling Python module build)
+endif
 
 # ------------------------------------------------------------------------------
 #  Platform detection

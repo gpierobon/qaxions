@@ -28,3 +28,5 @@ docs/_site/
 
 perf.*
 massif.*
+
+src/debug_print.h

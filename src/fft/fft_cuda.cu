@@ -4,31 +4,10 @@
 #include <cstdio>
 #include <cuda_runtime.h>
 #include <cufft.h>
-#include <fftw3.h>   // for fftw_complex typedef used in the base interface
+#include <fftw3.h> 
+#include "../gpu/cuda_utils.h"
 
 #include "fft.h"
-
-
-#define CUDA_CHECK(call)                                                      \
-    do {                                                                      \
-        cudaError_t _e = (call);                                              \
-        if (_e != cudaSuccess) {                                              \
-            fprintf(stderr, "CUDA error %s:%d  %s\n",                         \
-                    __FILE__, __LINE__, cudaGetErrorString(_e));              \
-            throw std::runtime_error(cudaGetErrorString(_e));                 \
-        }                                                                     \
-    } while (0)
-
-#define CUFFT_CHECK(call)                                                     \
-    do {                                                                      \
-        cufftResult _r = (call);                                              \
-        if (_r != CUFFT_SUCCESS) {                                            \
-            fprintf(stderr, "cuFFT error %s:%d  code=%d\n",                   \
-                    __FILE__, __LINE__, (int)_r);                             \
-            throw std::runtime_error("cuFFT error");                          \
-        }                                                                     \
-    } while (0)
-
 
 class CUFFTBackend : public FFTBackend
 {
@@ -54,46 +33,19 @@ public:
 
         int n = static_cast<int>(N_);
 
-        //// 3D
-        //cufftPlan3d(&plan_fwd_c2c_, n, n, n, CUFFT_Z2Z);
-        //cufftPlan3d(&plan_fwd_r2c_, n, n, n, CUFFT_D2Z);
-        //cufftPlan3d(&plan_bwd_c2r_, n, n, n, CUFFT_Z2D);
-        //cufftPlan3d(&plan_bwd_c2c_, n, n, n, CUFFT_Z2Z);
-        //
-        //// 2D
-        //cufftPlan2d(&plan_fwd_c2c_, n, n, CUFFT_Z2Z);
-        //// etc.
         if (dim_ == 3)
         {
-            int dims[3] = {n, n, n};
-            CUFFT_CHECK(cufftPlanMany(&plan_fwd_c2c_, 3, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_bwd_c2c_, 3, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_fwd_r2c_, 3, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_D2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_bwd_c2r_, 3, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2D, 1));
+            CUFFT_CHECK(cufftPlan3d(&plan_fwd_c2c_, n, n, n, CUFFT_Z2Z));
+            CUFFT_CHECK(cufftPlan3d(&plan_fwd_r2c_, n, n, n, CUFFT_D2Z));
+            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2r_, n, n, n, CUFFT_Z2D));
+            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2c_, n, n, n, CUFFT_Z2Z));
         }
         else
         {
-            int dims[2] = {n, n};
-            CUFFT_CHECK(cufftPlanMany(&plan_fwd_c2c_, 2, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_bwd_c2c_, 2, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_fwd_r2c_, 2, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_D2Z, 1));
-            CUFFT_CHECK(cufftPlanMany(&plan_bwd_c2r_, 2, dims,
-                                      nullptr, 1, 0, nullptr, 1, 0,
-                                      CUFFT_Z2D, 1));
+            CUFFT_CHECK(cufftPlan2d(&plan_fwd_c2c_, n, n, CUFFT_Z2Z));
+            CUFFT_CHECK(cufftPlan2d(&plan_fwd_r2c_, n, n, CUFFT_D2Z));
+            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2r_, n, n, CUFFT_Z2D));
+            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2c_, n, n, CUFFT_Z2Z));
         }
 
         if (verbose)
@@ -112,7 +64,6 @@ public:
     // ── interface implementation ─────────────────────────────────────────────
     // The base class uses fftw_complex*/double* in its signatures.
     // We cast to the binary-compatible cuFFT types inside each call.
-
     void forward_c2c(fftw_complex* data) override
     {
         CUFFT_CHECK(cufftExecZ2Z(plan_fwd_c2c_,

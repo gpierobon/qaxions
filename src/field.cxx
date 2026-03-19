@@ -7,6 +7,7 @@
 #include "parse.h"
 #include "enum.h"
 #include "utils.h"
+#include "debug_print.h"
 #include "profiler.h"
 #include "fft/fft.h"
 
@@ -34,7 +35,6 @@ void Field::init(Params& pars)
 
 #ifdef USE_GPU
     fft_backend_ = makeCUFFTBackend(dim_, N_, verb_);
-    //fft_backend_ = std::make_unique<CUFFTBackend>(dim_, N_, verb_);
 #else
     fft_backend_ = std::make_unique<FFTWOpenMPBackend>
                    (dim_, N_, pars.plan, verb_, nthr_);
@@ -61,7 +61,11 @@ void Field::init(Params& pars)
 
 Field::Field()
     : N_(0), dim_(0), nthr_(0), Lbox_(0.0), ds_(0.0), sites_(0), ksites_(0),
-      psi_(nullptr), Vhat_(nullptr), V_(nullptr) {}     
+      psi_(nullptr), Vhat_(nullptr), V_(nullptr), 
+#ifdef USE_GPU
+      d_psi_(nullptr), d_Vhat_(nullptr), d_V_(nullptr),
+#endif
+      fft_backend_(nullptr) {}
 
 Field::Field(Params& p)
     : Field()
@@ -147,15 +151,20 @@ void Field::drift(double dt)
     if (verb_)
         std::cout << "[drift] Applying c2c forward ..." << std::endl;
 
+
+#ifdef USE_GPU
+    { toDevice(); }// tmp
+#endif
+
     {
         PROFILE(FFT)
-        FLOP_COUNT(0, 32);
-#ifdef USE_GPU
-        fft_backend_->forward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
-#else
-        fft_backend_->forward_c2c(psi_);
-#endif
+        fft_forward_c2c();
     }
+
+#ifdef USE_GPU
+    { toHost(); } // tmp
+#endif
+
 
     if (verb_)
         std::cout << "[drift] Starting drift loop ..." << std::endl;
@@ -210,15 +219,19 @@ void Field::drift(double dt)
         std::cout << "[drift] Starting c2c backward ..." << std::endl;
     }
 
+#ifdef USE_GPU
+    { toDevice(); } // tmp
+#endif
+
     {
         PROFILE(FFT)
-        FLOP_COUNT(0, 32);
-#ifdef USE_GPU
-        fft_backend_->backward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
-#else
-        fft_backend_->backward_c2c(psi_);
-#endif
+        fft_backward_c2c();
     }
+
+#ifdef USE_GPU
+    { toHost(); } // tmp
+#endif
+
 
     if (verb_)
         std::cout << "[drift] done!" << std::endl;
@@ -333,16 +346,19 @@ void Field::updatePotential()
     
     if (verb_)
         std::cout << "[updatePotential] Starting 2rc forward ..." << std::endl;
-    {
-        PROFILE(FFT)
-        FLOP_COUNT(0, 32);
+
 #ifdef USE_GPU
-        fft_backend_->forward_r2c(reinterpret_cast<double*>(d_V_),
-                                  reinterpret_cast<fftw_complex*>(d_Vhat_));
-#else
-        fft_backend_->forward_r2c(V_, Vhat_);
+    { toDevice(); }
 #endif
+
+    { 
+        PROFILE(FFT); 
+        fft_forward_r2c();
     }
+
+#ifdef USE_GPU
+     { toHost(); }
+#endif
 
     if (verb_)
     {
@@ -358,16 +374,17 @@ void Field::updatePotential()
         std::cout << "[updatePotential] Starting c2r backward ... " << std::endl;
     }
 
-    {
-        PROFILE(FFT)
-        FLOP_COUNT(0, 32);
 #ifdef USE_GPU
-        fft_backend_->backward_c2r(reinterpret_cast<fftw_complex*>(d_Vhat_),
-                                   reinterpret_cast<double*>(d_V_));
-#else
-        fft_backend_->backward_c2r(Vhat_, V_);
+    { toDevice(); }
 #endif
+    { 
+        PROFILE(FFT); 
+        fft_backward_c2r();
     }
+
+#ifdef USE_GPU
+     { toHost(); }
+#endif
 
     if (verb_)
         std::cout << "[updatePotential] c2r backward done!" << std::endl;
@@ -382,6 +399,43 @@ void Field::updatePotential()
     Vmax_ = local_max;  
 }
 
+void Field::fft_forward_c2c()
+{
+#ifdef USE_GPU
+    fft_backend_->forward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+#else
+    fft_backend_->forward_c2c(psi_);
+#endif
+}
+
+void Field::fft_backward_c2c()
+{
+#ifdef USE_GPU
+    fft_backend_->backward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+#else
+    fft_backend_->backward_c2c(psi_);
+#endif
+}
+
+void Field::fft_forward_r2c()
+{
+#ifdef USE_GPU
+    fft_backend_->forward_r2c(reinterpret_cast<double*>(d_V_),
+                               reinterpret_cast<fftw_complex*>(d_Vhat_));
+#else
+    fft_backend_->forward_r2c(V_, Vhat_);
+#endif
+}
+
+void Field::fft_backward_c2r()
+{
+#ifdef USE_GPU
+    fft_backend_->backward_c2r(reinterpret_cast<fftw_complex*>(d_Vhat_),
+                                reinterpret_cast<double*>(d_V_));
+#else
+    fft_backend_->backward_c2r(Vhat_, V_);
+#endif
+}
 
 void Field::updateTime()
 {
@@ -422,21 +476,6 @@ void Field::drift_update()
     updatePotential();
 }
 
-void Field::propagate()
-{
-    if (verb_)
-        std::cout << "\n[Step: " << curr_ << "] =================" 
-                  << "============================= " << std::endl;
-
-    kick(0.5 * ds_);
-    drift(ds_);
-    updateTime();
-    updatePotential();
-    kick(0.5 * ds_);
-    if (verb_)
-        std::cout << "==========================================" 
-                  << "==============\n" << std::endl;
-}
 
 
 

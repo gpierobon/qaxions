@@ -72,6 +72,11 @@ class Field
         double a()  const { return a_;}
         int   nsteps()  const { return nsteps_;}
         int   cosmo()  const { return cosmo_;}
+        
+        void fft_forward_c2c();
+        void fft_backward_c2c();
+        void fft_forward_r2c();
+        void fft_backward_c2r();
 
 #ifdef USE_GPU
         void allocGPU();

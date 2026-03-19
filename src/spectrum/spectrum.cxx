@@ -47,11 +47,13 @@ void Spectrum::compute()
     //}
 
 #ifdef USE_GPU
-    fft_backend_->forward_r2c(reinterpret_cast<double*>(field_.deviceV()),
-                              reinterpret_cast<fftw_complex*>(field_.deviceVhat()));
-    field_.syncVhatToHost();
-#else
-    fft_backend_->forward_r2c(V_, Vhat_);
+    field_.toDevice(); // Check if they are needed later
+#endif
+
+    field_.fft_forward_r2c();
+
+#ifdef USE_GPU
+    field_.toHost();
 #endif
 
     if (dim_ == 3)

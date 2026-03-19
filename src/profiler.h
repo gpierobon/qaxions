@@ -97,9 +97,7 @@ inline void printProfStats(const Params& p, Clock::time_point sim_start)
                        ProfType::POISSON,
                        ProfType::IO,
                        ProfType::IC,
-                       ProfType::FIELD,
-                       ProfType::GPU_H2D,
-                       ProfType::GPU_D2H
+                       ProfType::FIELD
                       })
     {
         double prof_time = 0.0;
