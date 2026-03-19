@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <cstdio>
 
+static constexpr int CUDA_BLOCK = 256;
+
 #define CUDA_CHECK(call)                                                      \
     do {                                                                      \
         cudaError_t _e = (call);                                              \

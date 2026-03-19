@@ -10,6 +10,11 @@ data_dir = sys.argv[1]
 speed    = float(sys.argv[2])
 pattern = os.path.join(data_dir, "spec_*.txt")
 files = sorted(glob.glob(pattern))
+
+if len(files) < 1:
+    print("No field files found (set --meas 1!)")
+    exit(0)
+
 print(f"Found {len(files)} field files")
 
 plt.ion()

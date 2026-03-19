@@ -15,6 +15,7 @@
 #include "ic/ic.h"
 #include "spectrum/spectrum.h"
 #include "profiler.h"
+#include "propagator.h"
 
 
 
@@ -64,32 +65,36 @@ int main( int argc, char* argv[] )
     measure(*field, pars, 0, start); 
     field->updatePotential();
 
-//#ifdef USE_GPU
-//    field->toDevice();
-//#endif
+#ifdef USE_GPU
+    field->toDevice();
+#endif
 
     std::cout << "\nStarting time loop ... \n" << std::endl;
     
-    field->half_kick(); // Offset kicks
+    //field->half_kick(); // Offset kicks
+    half_kick(*field); // Offset kicks
     for (size_t idx = 0; idx < nsteps; ++idx)
     {
-        field->drift_update();
+        drift_update(*field);
+        //field->drift_update();
         
         // measure after drift (positions at integer time)
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
-//#ifdef USE_GPU
-//            field->toHost(); // This can be included inside measure()
-//#endif
+#ifdef USE_GPU
+            field->toHost(); // This can be included inside measure()
+#endif
             measure(*field, pars, measn, start);
         }
 
         // full kick except maybe last step
         if (idx != nsteps - 1)
-            field->full_kick();
+            full_kick(*field);
+            //field->full_kick();
     }
-    field->half_kick(); // Final kick
+    half_kick(*field); // Final kick
+    //field->half_kick(); // Final kick
     
     std::cout << "\nSimulation complete. " 
               << nmeas << " outputs saved" << std::endl;

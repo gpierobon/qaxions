@@ -115,127 +115,72 @@ void Field::setCosmo(Params& p)
 
 void Field::kick(double dt)
 {
+    PROFILE(KICK);
+
     if (verb_)
         std::cout << "[kick] Starting loop ..." << std::endl;
 
-    PROFILE(KICK);
-    FLOP_COUNT(128, 32);  // ~128 flops/site, 32 bytes/site
-    const double fac = -dt;
-
-    #pragma omp parallel for simd//schedule(dynamic)
-    for (size_t idx = 0; idx < sites_; ++idx)
-    {
-        double phase = fac * V_[idx];
-        double re = psi_[idx][0];
-        double im = psi_[idx][1];
-        double cos_p = std::cos(phase);
-        double sin_p = std::sin(phase);
-        psi_[idx][0] = re * cos_p - im * sin_p;
-        psi_[idx][1] = re * sin_p + im * cos_p;
-    }
+#ifdef USE_GPU
+    kick_gpu(dt);
+#else
+    kick_cpu(dt);
+#endif
     
     if (verb_)
         std::cout << "[kick] done!" << std::endl;
 }
 
-
 void Field::drift(double dt)
 {
     PROFILE(DRIFT);
-    FLOP_COUNT(128, 32);
-
-    const double fac = -0.5 * dt;
-    const double dk  = 2.0 * M_PI / Lbox_;
-    const int hN     = N_ / 2;
-
+    
     if (verb_)
         std::cout << "[drift] Applying c2c forward ..." << std::endl;
 
+//#ifdef USE_GPU
+//    { toDevice(); }// tmp
+//#endif
 
-#ifdef USE_GPU
-    { toDevice(); }// tmp
-#endif
+    { PROFILE(FFT); fft_forward_c2c(); }
 
-    {
-        PROFILE(FFT)
-        fft_forward_c2c();
-    }
-
-#ifdef USE_GPU
-    { toHost(); } // tmp
-#endif
+//#ifdef USE_GPU
+//    { toHost(); } // tmp
+//#endif
 
 
     if (verb_)
         std::cout << "[drift] Starting drift loop ..." << std::endl;
 
-    #pragma omp parallel for
-    for (size_t idx = 0; idx < sites_; ++idx)
-    {
-        double kx = 0.0, ky = 0.0, kz = 0.0;
+#ifdef USE_GPU
+    drift_k2_gpu(dt);
+#else
+    drift_k2_cpu(dt);
+#endif
 
-        if (dim_ == 3)
-        {
-            int iz = idx % N_;
-            int iy = (idx / N_) % N_;
-            int ix = idx / (N_ * N_);
-
-            int nx = (ix <= hN) ? ix : ix - N_;
-            int ny = (iy <= hN) ? iy : iy - N_;
-            int nz = (iz <= hN) ? iz : iz - N_;
-
-            kx = nx * dk;
-            ky = ny * dk;
-            kz = nz * dk;
-        }
-        else // 2D
-        {
-            int iy = idx / N_;
-            int ix = idx % N_;
-
-            int nx = (ix <= hN) ? ix : ix - N_;
-            int ny = (iy <= hN) ? iy : iy - N_;
-
-            kx = nx * dk;
-            ky = ny * dk;
-        }
-
-        double k2 = kx*kx + ky*ky + kz*kz;
-        double phase = fac * k2;
-
-        double re = psi_[idx][0];
-        double im = psi_[idx][1];
-
-        double cos_p = std::cos(phase);
-        double sin_p = std::sin(phase);
-
-        psi_[idx][0] = (re * cos_p - im * sin_p) / sites_;
-        psi_[idx][1] = (re * sin_p + im * cos_p) / sites_;
-    }
-    
     if (verb_)
     {
         std::cout << "[drift] done!" << std::endl;
         std::cout << "[drift] Starting c2c backward ..." << std::endl;
     }
 
-#ifdef USE_GPU
-    { toDevice(); } // tmp
-#endif
+//#ifdef USE_GPU
+//    { toDevice(); } // tmp
+//#endif
 
     {
         PROFILE(FFT)
         fft_backward_c2c();
     }
 
-#ifdef USE_GPU
-    { toHost(); } // tmp
-#endif
+//#ifdef USE_GPU
+//    { toHost(); } // tmp
+//#endif
 
 
     if (verb_)
         std::cout << "[drift] done!" << std::endl;
 }
+
 
 void Field::computeEnergy()
 {
@@ -266,138 +211,15 @@ void Field::computeEnergy()
     rhomax_ = local_max / avg;  
 }
 
-
-void Field::Poisson()
-{
-    int hN  = N_ / 2;
-    int hN1 = N_ / 2 + 1;
-    const double twopi = 2.0 * M_PI / Lbox_;
-
-    if (dim_ == 2)
-    {
-        double vol = N_ * N_;
-
-        #pragma omp parallel for collapse(2) schedule(static) default(shared)
-        for (int iy = 0; iy < N_; ++iy)
-        {
-            for (int ix = 0; ix < hN1; ++ix)
-            {
-                int nx = ix;  
-                int ny = (iy <= hN) ? iy : iy - N_; 
-                int idx = iy * hN1 + ix;
-
-                double kx = twopi * nx; 
-                double ky = twopi * ny; 
-                                            
-                double k2 = kx*kx + ky*ky;
-                k2 = k2 + (k2 == 0.0);
-                double fac = - 1 / k2 / vol;
-
-                Vhat_[idx][0] *= fac;
-                Vhat_[idx][1] *= fac;
-            }
-        }
-    }
-    else if (dim_ == 3)
-    {
-        double vol = N_ * N_ * N_;
-
-        #pragma omp parallel for collapse(3) schedule(static) default(shared)
-        for (int iz = 0; iz < N_; ++iz)
-        {
-            for (int iy = 0; iy < N_; ++iy)
-            {
-                for (int ix = 0; ix < hN1; ++ix)
-                {
-                    int nx = ix;
-                    int ny = (iy <= hN) ? iy : iy - N_; 
-                    int nz = (iz <= hN) ? iz : iz - N_;
-                    int idx = iz * N_ * hN1 + iy * hN1 + ix; 
-                    
-                    double kx = twopi * nx;
-                    double ky = twopi * ny;
-                    double kz = twopi * nz;
-                                            
-                    double k2 = kx*kx + ky*ky + kz*kz;
-                    k2 = k2 + (k2 == 0.0);
-                    double fac = - 1 / k2 / vol;
-
-                    Vhat_[idx][0] *= fac;
-                    Vhat_[idx][1] *= fac;
-                }
-            }
-        }
-    }
-}
-
-
 void Field::updatePotential()
 {
-    PROFILE(POISSON);
-
-    const double pref = norm_ * a_;
-
-    #pragma omp parallel for simd //schedule(static)
-    for (size_t i=0; i < sites_; ++i) 
-    {
-        double rho = psi_[i][0] * psi_[i][0] + psi_[i][1] * psi_[i][1];
-        V_[i] = pref * (rho - rho_mean_);
-    }
-    
-    if (verb_)
-        std::cout << "[updatePotential] Starting 2rc forward ..." << std::endl;
-
 #ifdef USE_GPU
-    { toDevice(); }
+    updatePotential_gpu();
+#else
+    updatePotential_cpu();
 #endif
-
-    { 
-        PROFILE(FFT); 
-        fft_forward_r2c();
-    }
-
-#ifdef USE_GPU
-     { toHost(); }
-#endif
-
-    if (verb_)
-    {
-        std::cout << "[updatePotential] 2rc forward done!" << std::endl;
-        std::cout << "[updatePotential] Starting Poisson ... " << std::endl;
-    }
-
-    Poisson();
-
-    if (verb_)
-    {
-        std::cout << "[updatePotential] Poisson done!" << std::endl;
-        std::cout << "[updatePotential] Starting c2r backward ... " << std::endl;
-    }
-
-#ifdef USE_GPU
-    { toDevice(); }
-#endif
-    { 
-        PROFILE(FFT); 
-        fft_backward_c2r();
-    }
-
-#ifdef USE_GPU
-     { toHost(); }
-#endif
-
-    if (verb_)
-        std::cout << "[updatePotential] c2r backward done!" << std::endl;
-
-    double local_max = 0.0;
-    #pragma omp parallel for reduction(max:local_max)
-    for (size_t i = 0; i < sites_; ++i)
-    {
-        double absV = std::abs(V_[i]);
-        if (absV > local_max) local_max = absV;
-    }
-    Vmax_ = local_max;  
 }
+
 
 void Field::fft_forward_c2c()
 {
@@ -408,6 +230,7 @@ void Field::fft_forward_c2c()
 #endif
 }
 
+
 void Field::fft_backward_c2c()
 {
 #ifdef USE_GPU
@@ -416,6 +239,7 @@ void Field::fft_backward_c2c()
     fft_backend_->backward_c2c(psi_);
 #endif
 }
+
 
 void Field::fft_forward_r2c()
 {
@@ -427,6 +251,7 @@ void Field::fft_forward_r2c()
 #endif
 }
 
+
 void Field::fft_backward_c2r()
 {
 #ifdef USE_GPU
@@ -436,6 +261,7 @@ void Field::fft_backward_c2r()
     fft_backend_->backward_c2r(Vhat_, V_);
 #endif
 }
+
 
 void Field::updateTime()
 {
@@ -450,32 +276,6 @@ void Field::updateTime()
     
     s_ += ds_;
 }
-
-void Field::half_kick()
-{
-    if (verb_)
-        std::cout << "Half-kick!" << std::endl;
-    kick(0.5 * ds_);
-}
-
-void Field::full_kick()
-{
-    kick(ds_);
-    if (verb_)
-        std::cout << "==========================================" 
-                  << "==============\n" << std::endl;
-}
-
-void Field::drift_update()
-{
-    if (verb_)
-        std::cout << "\n[Step: " << curr_ << "] =================" 
-                  << "============================= " << std::endl;
-    drift(ds_);
-    updateTime();
-    updatePotential();
-}
-
 
 
 

@@ -27,16 +27,23 @@ class Field
         ~Field();
 
         void kick(double dt);
+        void kick_cpu(double dt);
+        void kick_gpu(double dt);
+
         void drift(double dt);
-        double get_kSq(int idx); 
-        void Poisson();
+        void drift_k2_cpu(double dt);
+        void drift_k2_gpu(double dt);
+
+        //double get_kSq(int idx); 
+        //void Poisson();
+        void Poisson_cpu();
+        void Poisson_gpu();
         void updatePotential();
+        void updatePotential_cpu();
+        void updatePotential_gpu();
+
         void computeEnergy();
         void updateTime();
-        void half_kick();
-        void full_kick();
-        void drift_update();
-        void propagate();
 
         const fftw_complex* psi() const { return psi_; }   
         fftw_complex*       psi()       { return psi_; } 
@@ -69,6 +76,7 @@ class Field
         bool   verb()  const { return verb_;}
         int   curr()  const { return curr_;}
         double time()  const { return s_;}
+        double ds()  const { return ds_;}
         double a()  const { return a_;}
         int   nsteps()  const { return nsteps_;}
         int   cosmo()  const { return cosmo_;}
