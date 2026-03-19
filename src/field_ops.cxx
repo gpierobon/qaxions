@@ -1,8 +1,6 @@
 #include "field.h"
 #include "profiler.h"
 
-#include <hwy/highway.h>
-#include <hwy/contrib/math/math-inl.h>
 
 // ----------------------------------------------------------------------------
 //   Kick - CPU
