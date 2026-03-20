@@ -15,8 +15,10 @@ void Field::kick_cpu(double dt)
         Real phase = fac * V_[idx];
         Real re = psi_[idx][0];
         Real im = psi_[idx][1];
-        Real cos_p, sin_p;
-        SINCOS(phase, &sin_p, &cos_p); // Explicit fused sincos
+        
+        Real cos_p = std::cos(phase);
+        Real sin_p = std::sin(phase);
+        
         psi_[idx][0] = re * cos_p - im * sin_p;
         psi_[idx][1] = re * sin_p + im * cos_p;
     }

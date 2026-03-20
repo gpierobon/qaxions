@@ -33,8 +33,6 @@
 
     #define H5T_REAL                 H5T_NATIVE_DOUBLE
 
-    #define SINCOS                   sincos
-
 #else
     using Real = float;
     using Complex = fftwf_complex; // float[2]
@@ -63,8 +61,6 @@
     #define FFTW_DESTROY_PLAN        fftwf_destroy_plan
 
     #define H5T_REAL                 H5T_NATIVE_FLOAT
-
-    #define SINCOS                   sincosf
 
 #endif
 
