@@ -45,16 +45,17 @@ class Field
         void computeEnergy();
         void updateTime();
 
-        const fftw_complex* psi() const { return psi_; }   
-        fftw_complex*       psi()       { return psi_; } 
-        double getPsiIdx(int idx) const { return psi_[idx][0]; }
-        double getPsiImagIdx(int idx) const { return psi_[idx][1]; }
+        const Complex* psi() const { return psi_; }   
+        Complex*       psi()       { return psi_; } 
+        Real getPsiIdx(int idx) const { return psi_[idx][0]; }
+        Real getPsiImagIdx(int idx) const { return psi_[idx][1]; }
 
-        const double* V() const { return V_; }
-        double*       V()       { return V_; }
-        double getVIdx(int idx) const { return V_[idx]; }
+        const Real* V() const { return V_; }
+        Real*       V()       { return V_; }
+        Real getVIdx(int idx) const { return V_[idx]; }
 
-        fftw_complex* Vhat()     { return Vhat_; }
+        Complex* Vhat()     { return Vhat_; }
+
 #ifdef USE_GPU
         cufftDoubleComplex* devicePsi()  { return d_psi_;  }
         cufftDoubleReal*    deviceV()    { return d_V_;    }
@@ -70,9 +71,10 @@ class Field
         size_t sites()  const { return sites_; }
         size_t ksites() const { return ksites_; }
 
-        double Vmax() const { return Vmax_; }
-        double rhomax() const { return rhomax_; }
-        double rho_mean() const { return rho_mean_; }
+        Real Vmax() const { return Vmax_; }
+        Real rhomax() const { return rhomax_; }
+        Real rho_mean() const { return rho_mean_; }
+        
         bool   verb()  const { return verb_;}
         int   curr()  const { return curr_;}
         double time()  const { return s_;}
@@ -102,7 +104,6 @@ class Field
         int nthr_;
         double Lbox_;
         double norm_;
-        double rho_mean_;
         
         bool verb_;
 
@@ -117,12 +118,13 @@ class Field
         size_t sites_ = 0;
         size_t ksites_ = 0;
 
-        double Vmax_ = 0.0;
-        double rhomax_ = 0.0;
+        Real Vmax_ = 0.0;
+        Real rhomax_ = 0.0;
+        Real rho_mean_;
 
-        fftw_complex* psi_;
-        fftw_complex* Vhat_;
-        double*       V_;      
+        Complex* psi_;
+        Complex* Vhat_;
+        Real*    V_;      
 
 #ifdef USE_GPU
         cufftDoubleComplex* d_psi_;

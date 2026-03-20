@@ -75,7 +75,7 @@ void Spectrum::bin3D()
     const int    hN1    = N_ / 2 + 1;
     const int    Nmodes = hN + 1;
     const double norm   = 1.0 / (static_cast<double>(sites_) *
-                                  static_cast<double>(sites_));
+                                 static_cast<double>(sites_));
 
     // Local raw arrays so OMP array-reduction compiles on all backends
     std::vector<double> pk_loc   (Nmodes, 0.0);
@@ -99,14 +99,14 @@ void Spectrum::bin3D()
 
         // Hermitian correction: ix==0 or ix==hN has no conjugate in the
         // stored half-array, every other ix appears twice
-        double mult = (ix == 0 || ix == hN) ? 1.0 : 2.0;
+        Real mult = (ix == 0 || ix == hN) ? 1.0 : 2.0;
 
         size_t idx = static_cast<size_t>(iz) * N_ * hN1
                    + static_cast<size_t>(iy) * hN1
                    + ix;
 
-        double re = Vhat_[idx][0];
-        double im = Vhat_[idx][1];
+        Real re = Vhat_[idx][0];
+        Real im = Vhat_[idx][1];
 
         pk_raw [kbin] += mult * norm * (re*re + im*im);
         cnt_raw[kbin] += static_cast<int>(mult);
@@ -145,12 +145,12 @@ void Spectrum::bin2D()
             std::round(std::sqrt(double(nx*nx + ny*ny))));
         if (kbin >= Nmodes) continue;
 
-        double mult = (ix == 0 || ix == hN) ? 1.0 : 2.0;
+        Real mult = (ix == 0 || ix == hN) ? 1.0 : 2.0;
 
         size_t idx = static_cast<size_t>(iy) * hN1 + ix;
 
-        double re = Vhat_[idx][0];
-        double im = Vhat_[idx][1];
+        Real re = Vhat_[idx][0];
+        Real im = Vhat_[idx][1];
 
         pk_raw [kbin] += mult * norm * (re*re + im*im);
         cnt_raw[kbin] += static_cast<int>(mult);

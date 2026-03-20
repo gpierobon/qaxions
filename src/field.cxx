@@ -18,9 +18,9 @@ void Field::init(Params& pars)
 {
     PROFILE(FIELD);
 
-    if (psi_)  { fftw_free(psi_); psi_   = nullptr; }
-    if (V_)    { fftw_free(V_);     V_   = nullptr; }
-    if (Vhat_) { fftw_free(Vhat_); Vhat_ = nullptr; }
+    if (psi_)  { FFTW_FREE(psi_); psi_   = nullptr; }
+    if (V_)    { FFTW_FREE(V_);     V_   = nullptr; }
+    if (Vhat_) { FFTW_FREE(Vhat_); Vhat_ = nullptr; }
 
     N_      = pars.N;
     Lbox_   = pars.Lbox;
@@ -42,9 +42,9 @@ void Field::init(Params& pars)
     sites_  = fft_backend_->sites();
     ksites_ = fft_backend_->ksites();
 
-    psi_  = fftw_alloc_complex(sites_);
-    Vhat_ = fftw_alloc_complex(ksites_);
-    V_    = fftw_alloc_real(sites_);
+    psi_  = FFTW_ALLOC_C(sites_);
+    Vhat_ = FFTW_ALLOC_C(ksites_);
+    V_    = FFTW_ALLOC_R(sites_);
 
     if (!V_ || !psi_ || !Vhat_ )
         throw std::bad_alloc();
@@ -136,16 +136,7 @@ void Field::drift(double dt)
     if (verb_)
         std::cout << "[drift] Applying c2c forward ..." << std::endl;
 
-//#ifdef USE_GPU
-//    { toDevice(); }// tmp
-//#endif
-
-    { PROFILE(FFT); fft_forward_c2c(); }
-
-//#ifdef USE_GPU
-//    { toHost(); } // tmp
-//#endif
-
+    fft_forward_c2c();
 
     if (verb_)
         std::cout << "[drift] Starting drift loop ..." << std::endl;
@@ -162,19 +153,7 @@ void Field::drift(double dt)
         std::cout << "[drift] Starting c2c backward ..." << std::endl;
     }
 
-//#ifdef USE_GPU
-//    { toDevice(); } // tmp
-//#endif
-
-    {
-        PROFILE(FFT)
-        fft_backward_c2c();
-    }
-
-//#ifdef USE_GPU
-//    { toHost(); } // tmp
-//#endif
-
+    fft_backward_c2c();
 
     if (verb_)
         std::cout << "[drift] done!" << std::endl;
@@ -189,24 +168,24 @@ void Field::computeEnergy()
     #pragma omp parallel for
     for (size_t idx = 0; idx < sites_; ++idx)
     {
-        double re = psi_[idx][0];
-        double im = psi_[idx][1];
+        Real re = psi_[idx][0];
+        Real im = psi_[idx][1];
         V_[idx]   = re * re + im * im;
     }
     
     if (verb_)
         std::cout << "[computeEnergy] done ..." << std::endl;
 
-    double local_max = 0.0;
-    double local_sum = 0.0;
+    Real local_max = 0.0;
+    Real local_sum = 0.0;
     #pragma omp parallel for reduction(max:local_max) reduction(+:local_sum)
     for (size_t i = 0; i < sites_; ++i)
     {
-        double absV = std::abs(V_[i]);
+        Real absV = std::abs(V_[i]);
         if (absV > local_max) local_max = absV;
         local_sum += absV;
     }
-    double avg = local_sum / static_cast<double>(sites_);
+    Real avg = local_sum / static_cast<double>(sites_);
     rhomax_ = local_max / avg;  
 }
 
@@ -220,8 +199,12 @@ void Field::updatePotential()
 }
 
 
+// --------------------------------------
+// FFT wrappers
+// --------------------------------------
 void Field::fft_forward_c2c()
 {
+    PROFILE(FFT);
 #ifdef USE_GPU
     fft_backend_->forward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
 #else
@@ -232,6 +215,7 @@ void Field::fft_forward_c2c()
 
 void Field::fft_backward_c2c()
 {
+    PROFILE(FFT);
 #ifdef USE_GPU
     fft_backend_->backward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
 #else
@@ -242,6 +226,7 @@ void Field::fft_backward_c2c()
 
 void Field::fft_forward_r2c()
 {
+    PROFILE(FFT);
 #ifdef USE_GPU
     fft_backend_->forward_r2c(reinterpret_cast<double*>(d_V_),
                                reinterpret_cast<fftw_complex*>(d_Vhat_));
@@ -253,6 +238,7 @@ void Field::fft_forward_r2c()
 
 void Field::fft_backward_c2r()
 {
+    PROFILE(FFT);
 #ifdef USE_GPU
     fft_backend_->backward_c2r(reinterpret_cast<fftw_complex*>(d_Vhat_),
                                 reinterpret_cast<double*>(d_V_));

@@ -10,24 +10,19 @@ BIN_DIR    := bin
 SCRIPT_DIR := scripts
 
 # ------------------------------------------------------------------------------
-# Optional GPU
+# Options
 # ------------------------------------------------------------------------------
 
-WITH_GPU ?= 0
-
-# GPU architecture — override on the command line if needed:
-#   make WITH_GPU=1 GPU_ARCH=sm_80   (A100)
-GPU_ARCH ?= sm_60
-
-# ------------------------------------------------------------------------------
-# Optional Python bindings
-# ------------------------------------------------------------------------------
-
+# Default to double precision
+WITH_DOUBLE ?= 1
+# Default with bindings, if pybind is found
 WITH_PYTHON ?= 1
-ifeq ($(WITH_GPU), 1)
-	WITH_PYTHON = 0
-        $(warning GPU (nvcc) build — disabling Python module build)
-endif
+# For builds on HPC system Gadi (NCI)
+WITH_GADI   ?= 0
+# Enable GPU acceleration with 'make WITH_GPU=1'
+WITH_GPU    ?= 0
+# GPU architecture, sm_80 (A100), sm_90 (H200)
+GPU_ARCH    ?= sm_60
 
 # ------------------------------------------------------------------------------
 #  Platform detection
@@ -35,12 +30,11 @@ endif
 
 UNAME_S := $(shell uname -s)
 
-GADI ?= 0
 
 ifeq ($(UNAME_S),Darwin)
     PLATFORM := mac
 else
-    ifeq ($(GADI), 1)
+    ifeq ($(WITH_GADI), 1)
 	PLATFORM := gadi
     else
         PLATFORM := linux
@@ -64,6 +58,11 @@ OPT    := -O3 -g -Wall -Wextra -Wno-unknown-pragmas
 # ------------------------------------------------------------------------------
 
 PYTHON := python3
+
+ifeq ($(WITH_GPU), 1)
+	WITH_PYTHON = 0
+        $(warning GPU (nvcc) build — disabling Python module build)
+endif
 
 ifeq ($(WITH_PYTHON),1)
 
@@ -119,14 +118,16 @@ endif
 
 ifeq ($(PLATFORM),mac)
     FFTW_INC := -I$(BREW)/include
-    FFTW_LIB := -L$(BREW)/lib -lfftw3_omp -lfftw3
+    FFTW_LIB := -L$(BREW)/lib -lfftw3 -lfftw3f -lfftw3_omp -lfftw3f_omp
 else
-    ifeq ($(GADI), 1)
-    	FFTW_INC := -I/apps/fftw3/3.3.8/include
-    	FFTW_LIB := -L/apps/fftw3/3.3.8/lib -lfftw3_omp_GNU -lfftw3
+    ifeq ($(WITH_GADI), 1)
+    	FFTW_INC := -I/apps/fftw3/3.3.10-nci1/include
+    	FFTW_LIB := -L/apps/fftw3/3.3.10-nci1/lib -lfftw3 -lfftw3f
+	FFTW_LIb += -lfftw3_omp_GNU -lfftw3f_omp_GNU
     else
 	FFTW_INC := -I/usr/local/fftw3/include
-    	FFTW_LIB := -L/usr/local/fftw3/lib -lfftw3_omp -lfftw3
+    	FFTW_LIB := -L/usr/local/fftw3/lib -lfftw3 -lfftw3f 
+	FFTW_LIB += -lfftw3_omp -lfftw3f_omp
     endif
 endif
 
@@ -172,6 +173,10 @@ endif
 
 ifeq ($(WITH_PYTHON),1)
     CXXFLAGS += $(PYBIND_INCL)
+endif
+
+ifeq ($(WITH_DOUBLE), 1)
+    CXXFLAGS += -DUSE_DOUBLE
 endif
 
 # Pure library flags — only -l/-L entries, no compiler driver flags.
@@ -307,6 +312,7 @@ info:
 	@echo "CXX           = $(CXX)"
 	@echo "LINKER        = $(LINKER)"
 	@echo "Python        = $(PYTHON)"
+	@echo "WITH_DOUBLE   = $(WITH_DOUBLE)"
 	@echo "WITH_PYTHON   = $(WITH_PYTHON)"
 	@echo "WITH_GPU      = $(WITH_GPU)"
 	@echo "GPU_ARCH      = $(GPU_ARCH)"

@@ -254,15 +254,15 @@ void IO::readJaxions(Params& pars, Field& field)
     field.init(pars);
 
     // 3. Read m, v arrays
-    std::vector<double> real(field.sites());
-    readDataset(real.data(), H5T_NATIVE_DOUBLE, "/m");
+    std::vector<Real> real(field.sites());
+    readDataset(real.data(), H5T_REAL, "/m");
 
-    std::vector<double> imag(field.sites());
-    readDataset(imag.data(), H5T_NATIVE_DOUBLE, "/v");
+    std::vector<Real> imag(field.sites());
+    readDataset(imag.data(), H5T_REAL, "/v");
 
-    fftw_complex* psi = field.psi();
+    Complex* psi = field.psi();
     double ai = 0.01;
-    double pref = std::pow(ai, 1.5) / SQRT2; 
+    Real pref = std::pow(ai, 1.5) / SQRT2; 
 
     #pragma omp parallel for
     for (size_t i = 0; i < field.sites(); ++i)
@@ -293,13 +293,13 @@ void IO::readConf(Params& pars, Field& field)
     field.init(pars);
     
     // 3. Read m, v arrays
-    std::vector<double> real(field.sites());
-    readDataset(real.data(), H5T_NATIVE_DOUBLE, "/psi/real");
+    std::vector<Real> real(field.sites());
+    readDataset(real.data(), H5T_REAL, "/psi/real");
 
-    std::vector<double> imag(field.sites());
-    readDataset(imag.data(), H5T_NATIVE_DOUBLE, "/psi/imag");
+    std::vector<Real> imag(field.sites());
+    readDataset(imag.data(), H5T_REAL, "/psi/imag");
 
-    fftw_complex* psi = field.psi();
+    Complex* psi = field.psi();
 
     #pragma omp parallel for
     for (size_t i = 0; i < field.sites(); ++i)
@@ -328,8 +328,8 @@ void IO::writeConf(const Field& field, bool save_psi)
     else // dim == 2
         dims = {static_cast<hsize_t>(N), static_cast<hsize_t>(N), 1};
     
-    std::vector<double> rho(sites);
-    const double* V = field.V();
+    std::vector<Real> rho(sites);
+    const Real* V = field.V();
 
     #pragma omp parallel for
     for (size_t i = 0; i < sites; ++i)
@@ -337,12 +337,12 @@ void IO::writeConf(const Field& field, bool save_psi)
     
     const std::string rho_group = "rho";
     createGroup(rho_group);
-    writeDataset(rho.data(), H5T_NATIVE_DOUBLE, dims, "data", rho_group);
+    writeDataset(rho.data(), H5T_REAL, dims, "data", rho_group);
 
     if (save_psi)
     {
-        std::vector<double> real_part(sites), imag_part(sites);
-        const fftw_complex* psi = field.psi();
+        std::vector<Real> real_part(sites), imag_part(sites);
+        const Complex* psi = field.psi();
         
         #pragma omp parallel for
         for (size_t i = 0; i < sites; ++i)
@@ -353,8 +353,8 @@ void IO::writeConf(const Field& field, bool save_psi)
 
         const std::string psi_group = "psi";
         createGroup(psi_group);
-        writeDataset(real_part.data(), H5T_NATIVE_DOUBLE, dims, "real", psi_group);
-        writeDataset(imag_part.data(), H5T_NATIVE_DOUBLE, dims, "imag", psi_group);
+        writeDataset(real_part.data(), H5T_REAL, dims, "real", psi_group);
+        writeDataset(imag_part.data(), H5T_REAL, dims, "imag", psi_group);
     }
     
     
