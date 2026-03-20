@@ -7,10 +7,10 @@
 // ----------------------------------------------------------------------------
 //   Kick - GPU
 // ----------------------------------------------------------------------------
-__global__ void kick_kernel(CuComplex* psi,
+__global__ void kick_kernel(CuComplex*  psi,
                             const Real* V,
                             size_t      sites,
-                            double      fac)
+                            Real        fac)
 {
     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= sites) return;
@@ -32,7 +32,6 @@ void Field::kick_gpu(double dt)
     int grid = (sites_ + CUDA_BLOCK - 1) / CUDA_BLOCK;
     kick_kernel<<<grid, CUDA_BLOCK>>>(d_psi_, d_V_, sites_, fac);
     CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
 }
 
 // ----------------------------------------------------------------------------
@@ -91,7 +90,6 @@ void Field::drift_k2_gpu(double dt)
     int grid = (sites_ + CUDA_BLOCK - 1) / CUDA_BLOCK;
     drift_kernel<<<grid, CUDA_BLOCK>>>(d_psi_, sites_, fac, dk, N_, dim_);
     CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
 }
 
 
@@ -219,7 +217,6 @@ void Field::updatePotential_gpu()
     vmax_kernel<<<n_blocks, CUDA_BLOCK, CUDA_BLOCK * sizeof(Real)>>>(
         d_V_, d_block_max, sites_);
     CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
 
     // Finalise on host — n_blocks is small enough that this is negligible
     std::vector<Real> h_block_max(n_blocks);
