@@ -128,7 +128,7 @@ else
     ifeq ($(WITH_GADI), 1)
     	FFTW_INC := -I/apps/fftw3/3.3.8/include
     	FFTW_LIB := -L/apps/fftw3/3.3.8/lib -lfftw3 -lfftw3f
-	FFTW_LIb += -lfftw3_omp_GNU -lfftw3f_omp_GNU
+	FFTW_LIB += -lfftw3_omp_GNU -lfftw3f_omp_GNU
     else
 	FFTW_INC := -I/usr/local/fftw3/include
     	FFTW_LIB := -L/usr/local/fftw3/lib -lfftw3 -lfftw3f 
