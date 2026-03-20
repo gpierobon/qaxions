@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <fftw3.h>
-#include "../types.h"
+#include "../core/types.h"
 
 // Forward declaration — avoids pulling in all of Field.hh
 class Field;

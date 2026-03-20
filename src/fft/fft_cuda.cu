@@ -6,7 +6,7 @@
 #include <cufft.h>
 #include <fftw3.h> 
 #include "../gpu/cuda_utils.h"
-#include "../types.h"
+#include "../core/types.h"
 
 #include "fft.h"
 

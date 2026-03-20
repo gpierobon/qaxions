@@ -3,9 +3,9 @@
 
 #include <memory>
 #include <fftw3.h>
-#include "../enum.h"
 #include "../parse.h"
-#include "../types.h"
+#include "../core/enum.h"
+#include "../core/types.h"
 
 class FFTBackend
 {

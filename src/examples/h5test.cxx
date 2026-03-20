@@ -1,9 +1,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
-#include "../field.h"
+#include "../field/field.h"
 #include "../parse.h"
-#include "../profiler.h"
+#include "../core/profiler.h"
 #include "../io/io.h"
 #include "../ic/ic.h"
 

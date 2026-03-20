@@ -5,7 +5,7 @@
 #include <stdexcept>
 
 #include "spectrum.h"
-#include "../field.h"
+#include "../field/field.h"
 
 
 Spectrum::Spectrum(Field& f)

@@ -4,14 +4,14 @@
 #include <omp.h>
 
 #include "field.h"
-#include "parse.h"
-#include "enum.h"
-#include "utils.h"
-#include "profiler.h"
-#include "fft/fft.h"
+#include "../parse.h"
+#include "../utils.h"
+#include "../core/enum.h"
+#include "../core/profiler.h"
+#include "../fft/fft.h"
 
 #ifdef USE_GPU
-    #include "fft/fft_cuda.h"
+    #include "../fft/fft_cuda.h"
 #endif
 
 void Field::init(Params& pars)

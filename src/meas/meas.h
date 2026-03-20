@@ -1,8 +1,8 @@
 #ifndef __MEAS_H
 #define __MEAS_H
 
-#include "enum.h"
-#include "utils.h"
+#include "../core/enum.h"
+#include "../utils.h"
 
 
 inline MeasureType operator|(MeasureType a, MeasureType b)

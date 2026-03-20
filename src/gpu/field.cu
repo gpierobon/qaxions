@@ -1,5 +1,5 @@
-#include "../field.h"
-#include "../profiler.h"
+#include "../field/field.h"
+#include "../core/profiler.h"
 #include "cuda_utils.h"
 
 

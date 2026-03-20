@@ -1,8 +1,8 @@
-#include "enum.h"
 #include "meas.h"
-#include "utils.h"
-#include "io/io.h"
-#include "spectrum/spectrum.h"
+#include "../core/enum.h"
+#include "../utils.h"
+#include "../io/io.h"
+#include "../spectrum/spectrum.h"
 
 
 MeasureType parseMeasureType(uint32_t value)

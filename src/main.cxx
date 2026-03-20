@@ -9,13 +9,13 @@
 
 #include "parse.h"
 #include "utils.h"
-#include "field.h"
-#include "meas.h"
+#include "field/field.h"
+#include "meas/meas.h"
 #include "io/io.h"
 #include "ic/ic.h"
 #include "spectrum/spectrum.h"
-#include "profiler.h"
-#include "propagator.h"
+#include "core/profiler.h"
+#include "propagator/propagator.h"
 
 
 

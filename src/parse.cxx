@@ -1,6 +1,6 @@
 #include <omp.h>
 #include "parse.h"
-#include "meas.h"
+#include "meas/meas.h"
 #include <unordered_map>
 
 
@@ -29,29 +29,6 @@ void defaults(Params& pars)
     pars.measinfo = MeasureType::NONE;
 }
 
-void printHelp()
-{
-    std::cout << R"(
-    qaxions - 3D solver for axion dark matter
-
-    Usage:
-      ./qaxions [options]
-
-    Options:
-      --dim    <int>     Grid dimension (default: 3)
-      --N      <int>     Grid size (default: 64)
-      --nthr   <int>     Number of threads per process (default: 1)
-      --ai     <float>   Initial scale factor (default: 0.1)
-      --norm   <float>   Poisson's equation normalisation
-      --dt     <float>   Time step
-      --steps  <int>     Number of time steps
-      --nmeas  <int>     Number of measurements
-      --meas   <int>     Type of measurements (use --measinfo)
-      --t      <float>   Final time
-      --fft    <int>     FFTW plan: estimate (0) | measure (1) | patient | exhaustive
-      --help          Show help
-    )";
-}
 
 void parseArgs(int argc, char* argv[], Params* pars)
 {
@@ -137,19 +114,6 @@ void setDir(Params* pars)
         std::filesystem::create_directory(out_dir);
 }
 
-
-void printBanner()
-{
-    std::cout << "\033[1;96m";
-    std::cout << R"(
-          _ \                _|
-         |   |   _` | \ \  /  |   _ \   __ \    __|
-         |   |  (   |  `  <   |  |   |  |   | \__ \
-        \__\_\ \__,_|  _/\_\ _| \___/  _|  _| ____/
-
-    )" << std::endl;
-    std::cout << "\033[0m";
-}
 
 
 Params init(int argc, char* argv[])

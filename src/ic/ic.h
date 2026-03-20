@@ -1,7 +1,7 @@
 #ifndef IC_H
 #define IC_H
 
-#include "../field.h"
+#include "../field/field.h"
 #include "../parse.h"
 #include <memory>
 #include <string>

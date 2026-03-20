@@ -7,9 +7,10 @@
 #include <memory>
 #include <random>
 #include <complex>
-#include "parse.h"
-#include "fft/fft.h"
-#include "types.h"
+#include "../parse.h"
+#include "../fft/fft.h"
+#include "../core/types.h"
+
 
 #ifdef USE_GPU
 #include <cuda_runtime.h>

@@ -6,8 +6,8 @@
 #include <sstream>
 
 #include "io.h"
-#include "../field.h"
-#include "../profiler.h"
+#include "../field/field.h"
+#include "../core/profiler.h"
 
 #define SQRT2 1.41421356237
 

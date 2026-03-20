@@ -8,8 +8,8 @@
 #include <iostream>
 #include <iomanip>
 
-#include "utils.h"
-#include "parse.h"
+#include "../utils.h"
+#include "../parse.h"
 
 
 struct FlopCounter

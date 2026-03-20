@@ -1,8 +1,8 @@
 #ifdef USE_GPU
 
 #include "field.h"
-#include "profiler.h"
-#include "gpu/cuda_utils.h"
+#include "../core/profiler.h"
+#include "../gpu/cuda_utils.h"
 
 // ----------------------------------------------------------------------------
 //   Kick - GPU

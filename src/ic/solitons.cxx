@@ -6,7 +6,7 @@
 #include <string>
 #include <cmath>
 #include "solitons.h"
-#include "../profiler.h"
+#include "../core/profiler.h"
 
 struct Soliton
 {

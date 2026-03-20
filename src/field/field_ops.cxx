@@ -1,5 +1,5 @@
 #include "field.h"
-#include "profiler.h"
+#include "../core/profiler.h"
 
 
 // ----------------------------------------------------------------------------

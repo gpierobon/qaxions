@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <filesystem>
-#include "enum.h"
+#include "core/enum.h"
 
 
 typedef struct
