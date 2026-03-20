@@ -7,9 +7,10 @@
 ## Features
 
 - High-performance C++ core
-- Python bindings via `pybind11`
 - OpenMP parallelism
 - HDF5 and FFTW support
+- GPU acceleration with CUDA/cuFFT
+- Python bindings via `pybind11`
 - Linux and macOS support
 
 ---

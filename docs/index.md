@@ -28,26 +28,39 @@ git clone https://gitlab.com/gpierobon/qaxions.git
 ## Features
 
 - High-performance C++ core
-- Python bindings via `pybind11`
 - OpenMP parallelism
 - HDF5 and FFTW support
+- GPU acceleration with CUDA/cuFFT
+- Python bindings via `pybind11`
 - Linux and macOS support
 
 ## Repository layout
 
 ```text
 .
-├── src/                 # C++ sources
-│   ├── examples/        # pybind11 modules for tests (.cxx)
-│   └── ...
-├── pyqaxions/           # Python package (generated at build time for the tests)
-├── tests/               # Testing scripts from pybind11
-├── build/               # Build artifacts
-├── bin/                 # Binary files for plotting
+├── src/              # C++ sources
+│   │ 
+│   ├── core/               ← types.h, enum.h, profiler.h
+│   ├── field/              ← field.h, field.cxx, field_ops ...
+│   ├── fft/                ← fft.h, fft_cuda.cu, fft_cuda.h
+│   ├── gpu/                ← cuda_utils.h, field_gpu.cu,
+│   ├── ic/                 ← ic.h, ic.cxx, ...
+│   ├── io/                 ← io.h, io.cxx
+│   ├── meas/               ← meas.h, meas.cxx
+│   ├── spectrum/           ← spectrum.h, spectrum.cxx
+│   ├── propagator/         ← propagator.h, propagator.cxx
+│   ├── examples/           ← pybind examples
+│   └── main.cxx            ← main program
+│ 
+├── pyqaxions/        # Python package (generated at build time for the tests)
+├── scritps/          # Python package (generated at build time for the tests)
+├── tests/            # Testing scripts from pybind11
+├── build/            # Build artifacts
+├── bin/              # Binary files for plotting
+├── output/           # Default directory with output snapshots/spectra
 ├── Makefile
 └── README.md
 ```
-
 
 
 [gitlab repo]: https://gitlab.com/gpierobon/qaxions.git
