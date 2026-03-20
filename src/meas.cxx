@@ -18,6 +18,12 @@ void measure(Field& f, const Params& p, size_t measNumber, Clock::time_point st)
     if (meas == MeasureType::NONE)
         return;
 
+#ifdef USE_GPU
+    // only sync if device has valid data
+    if (f.gpu_active())
+        f.toHost();
+#endif
+
     int curr_step = f.curr();
     int nsteps = f.nsteps();
     bool verb = f.verb();

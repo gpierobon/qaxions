@@ -38,8 +38,11 @@ int main( int argc, char* argv[] )
     if (pars.readj)
     {
         field = std::make_unique<Field>();
-        IO reader("jaxions_2D.hdf5", FileMode::ReadOnly);
-        reader.readJaxions(pars, *field);
+        { 
+            PROFILE(IC);
+            IO reader("jaxions_2D.hdf5", FileMode::ReadOnly);
+            reader.readJaxions(pars, *field);
+        }
         std::cout << "\nField created, it took " << timeSince(start) << std::endl;
         std::cout << "Restart successful. Grid: N=" << field->size()
                   << ", dim=" << field->dim()
@@ -62,40 +65,42 @@ int main( int argc, char* argv[] )
     size_t nmeas  = static_cast<size_t>(pars.nmeas);
     std::vector<size_t> mlist = generateMeasList(nsteps, nmeas);
 
+    // Meas 0: on host
     measure(*field, pars, 0, start); 
-    field->updatePotential();
 
+    // Transfer to device once after ICs and step-0 measurement
 #ifdef USE_GPU
     field->toDevice();
 #endif
 
+    // Initial potential before time loop
+    field->updatePotential();
+
     std::cout << "\nStarting time loop ... \n" << std::endl;
     
-    //field->half_kick(); // Offset kicks
     half_kick(*field); // Offset kicks
     for (size_t idx = 0; idx < nsteps; ++idx)
     {
         drift_update(*field);
-        //field->drift_update();
         
         // measure after drift (positions at integer time)
         if (next_meas < mlist.size() && idx == mlist[next_meas])
         {
             ++measn; ++next_meas;
-#ifdef USE_GPU
-            field->toHost(); // This can be included inside measure()
-#endif
-            measure(*field, pars, measn, start);
+            measure(*field, pars, measn, start); // GPU-aware
         }
 
         // full kick except maybe last step
         if (idx != nsteps - 1)
             full_kick(*field);
-            //field->full_kick();
     }
     half_kick(*field); // Final kick
-    //field->half_kick(); // Final kick
     
+    // Final sync to host
+#ifdef USE_GPU
+    field->toHost();
+#endif
+
     std::cout << "\nSimulation complete. " 
               << nmeas << " outputs saved" << std::endl;
     std::cout << "Finished: it took " 

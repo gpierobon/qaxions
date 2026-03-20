@@ -36,24 +36,12 @@ void Spectrum::compute()
     std::fill(Pk_.begin(),    Pk_.end(),    0.0);
     std::fill(count_.begin(), count_.end(), 0);
 
-    // Necessary??
-    //#pragma omp parallel for simd
-    //for (size_t i = 0; i < sites_; ++i)
-    //{
-    //    double re  = psi_[i][0];
-    //    double im  = psi_[i][1];
-    //    double rho = re*re + im*im;
-    //    V_[i] = (rho - rho_mean_) / rho_mean_;
-    //}
-
 #ifdef USE_GPU
-    field_.toDevice(); // Check if they are needed later
-#endif
-
+    field_.syncVToDevice();
     field_.fft_forward_r2c();
-
-#ifdef USE_GPU
-    field_.toHost();
+    field_.syncVhatToHost();
+#else
+    field_.fft_forward_r2c();
 #endif
 
     if (dim_ == 3)

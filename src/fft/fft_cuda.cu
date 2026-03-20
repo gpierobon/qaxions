@@ -6,6 +6,7 @@
 #include <cufft.h>
 #include <fftw3.h> 
 #include "../gpu/cuda_utils.h"
+#include "../types.h"
 
 #include "fft.h"
 
@@ -35,17 +36,17 @@ public:
 
         if (dim_ == 3)
         {
-            CUFFT_CHECK(cufftPlan3d(&plan_fwd_c2c_, n, n, n, CUFFT_Z2Z));
-            CUFFT_CHECK(cufftPlan3d(&plan_fwd_r2c_, n, n, n, CUFFT_D2Z));
-            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2r_, n, n, n, CUFFT_Z2D));
-            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2c_, n, n, n, CUFFT_Z2Z));
+            CUFFT_CHECK(cufftPlan3d(&plan_fwd_c2c_, n, n, n, CUFFT_C2C_TYPE));
+            CUFFT_CHECK(cufftPlan3d(&plan_fwd_r2c_, n, n, n, CUFFT_R2C_TYPE));
+            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2r_, n, n, n, CUFFT_C2R_TYPE));
+            CUFFT_CHECK(cufftPlan3d(&plan_bwd_c2c_, n, n, n, CUFFT_C2C_TYPE));
         }
         else
         {
-            CUFFT_CHECK(cufftPlan2d(&plan_fwd_c2c_, n, n, CUFFT_Z2Z));
-            CUFFT_CHECK(cufftPlan2d(&plan_fwd_r2c_, n, n, CUFFT_D2Z));
-            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2r_, n, n, CUFFT_Z2D));
-            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2c_, n, n, CUFFT_Z2Z));
+            CUFFT_CHECK(cufftPlan2d(&plan_fwd_c2c_, n, n, CUFFT_C2C_TYPE));
+            CUFFT_CHECK(cufftPlan2d(&plan_fwd_r2c_, n, n, CUFFT_R2C_TYPE));
+            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2r_, n, n, CUFFT_C2R_TYPE));
+            CUFFT_CHECK(cufftPlan2d(&plan_bwd_c2c_, n, n, CUFFT_C2C_TYPE));
         }
 
         if (verbose)
@@ -61,40 +62,38 @@ public:
         cufftDestroy(plan_bwd_c2r_);
     }
 
-    // ── interface implementation ─────────────────────────────────────────────
-    // The base class uses fftw_complex*/double* in its signatures.
-    // We cast to the binary-compatible cuFFT types inside each call.
-    void forward_c2c(fftw_complex* data) override
+    
+    void forward_c2c(Complex* data) override
     {
-        CUFFT_CHECK(cufftExecZ2Z(plan_fwd_c2c_,
-                                 reinterpret_cast<cufftDoubleComplex*>(data),
-                                 reinterpret_cast<cufftDoubleComplex*>(data),
-                                 CUFFT_FORWARD));
+        CUFFT_CHECK(CUFFT_EXEC_C2C(plan_fwd_c2c_,
+                                   reinterpret_cast<CuComplex*>(data),
+                                   reinterpret_cast<CuComplex*>(data),
+                                   CUFFT_FORWARD));
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 
-    void backward_c2c(fftw_complex* data) override
+    void backward_c2c(Complex* data) override
     {
-        CUFFT_CHECK(cufftExecZ2Z(plan_bwd_c2c_,
-                                 reinterpret_cast<cufftDoubleComplex*>(data),
-                                 reinterpret_cast<cufftDoubleComplex*>(data),
-                                 CUFFT_INVERSE));
+        CUFFT_CHECK(CUFFT_EXEC_C2C(plan_bwd_c2c_,
+                                   reinterpret_cast<CuComplex*>(data),
+                                   reinterpret_cast<CuComplex*>(data),
+                                   CUFFT_INVERSE));
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 
-    void forward_r2c(double* in_real, fftw_complex* out_complex) override
+    void forward_r2c(Real* in_real, Complex* out_complex) override
     {
-        CUFFT_CHECK(cufftExecD2Z(plan_fwd_r2c_,
-                                 reinterpret_cast<cufftDoubleReal*>(in_real),
-                                 reinterpret_cast<cufftDoubleComplex*>(out_complex)));
+        CUFFT_CHECK(CUFFT_EXEC_R2C(plan_fwd_r2c_,
+                                   reinterpret_cast<CuReal*>(in_real),
+                                   reinterpret_cast<CuComplex*>(out_complex)));
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 
-    void backward_c2r(fftw_complex* in_complex, double* out_real) override
+    void backward_c2r(Complex* in_complex, Real* out_real) override
     {
-        CUFFT_CHECK(cufftExecZ2D(plan_bwd_c2r_,
-                                 reinterpret_cast<cufftDoubleComplex*>(in_complex),
-                                 reinterpret_cast<cufftDoubleReal*>(out_real)));
+        CUFFT_CHECK(CUFFT_EXEC_C2R(plan_bwd_c2r_,
+                                   reinterpret_cast<CuComplex*>(in_complex),
+                                   reinterpret_cast<CuReal*>(out_real)));
         CUDA_CHECK(cudaDeviceSynchronize());
     }
 

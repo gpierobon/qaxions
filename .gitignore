@@ -5,8 +5,7 @@ pyqaxions
 build/
 bin/
 output/
-o0/
-o1/
+o*/
 tests/__pycache__
 .DS_Store
 
@@ -30,3 +29,5 @@ perf.*
 massif.*
 
 src/debug_print.h
+prec_benchmark.sh
+scripts/plot_spectra.py

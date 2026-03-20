@@ -59,11 +59,11 @@ void Field::init(Params& pars)
 }
 
 Field::Field()
-    : N_(0), dim_(0), nthr_(0), Lbox_(0.0), ds_(0.0), sites_(0), ksites_(0),
-      psi_(nullptr), Vhat_(nullptr), V_(nullptr), 
+    : psi_(nullptr), Vhat_(nullptr), V_(nullptr),
 #ifdef USE_GPU
       d_psi_(nullptr), d_Vhat_(nullptr), d_V_(nullptr),
 #endif
+      Lbox_(0.0), ds_(0.0), N_(0), dim_(0), nthr_(0), sites_(0), ksites_(0),
       fft_backend_(nullptr) {}
 
 Field::Field(Params& p)
@@ -206,7 +206,7 @@ void Field::fft_forward_c2c()
 {
     PROFILE(FFT);
 #ifdef USE_GPU
-    fft_backend_->forward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+    fft_backend_->forward_c2c(reinterpret_cast<Complex*>(d_psi_));
 #else
     fft_backend_->forward_c2c(psi_);
 #endif
@@ -217,7 +217,7 @@ void Field::fft_backward_c2c()
 {
     PROFILE(FFT);
 #ifdef USE_GPU
-    fft_backend_->backward_c2c(reinterpret_cast<fftw_complex*>(d_psi_));
+    fft_backend_->backward_c2c(reinterpret_cast<Complex*>(d_psi_));
 #else
     fft_backend_->backward_c2c(psi_);
 #endif
@@ -228,8 +228,8 @@ void Field::fft_forward_r2c()
 {
     PROFILE(FFT);
 #ifdef USE_GPU
-    fft_backend_->forward_r2c(reinterpret_cast<double*>(d_V_),
-                               reinterpret_cast<fftw_complex*>(d_Vhat_));
+    fft_backend_->forward_r2c(reinterpret_cast<Real*>(d_V_),
+                              reinterpret_cast<Complex*>(d_Vhat_));
 #else
     fft_backend_->forward_r2c(V_, Vhat_);
 #endif
@@ -240,8 +240,8 @@ void Field::fft_backward_c2r()
 {
     PROFILE(FFT);
 #ifdef USE_GPU
-    fft_backend_->backward_c2r(reinterpret_cast<fftw_complex*>(d_Vhat_),
-                                reinterpret_cast<double*>(d_V_));
+    fft_backend_->backward_c2r(reinterpret_cast<Complex*>(d_Vhat_),
+                               reinterpret_cast<Real*>(d_V_));
 #else
     fft_backend_->backward_c2r(Vhat_, V_);
 #endif

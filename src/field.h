@@ -9,6 +9,7 @@
 #include <complex>
 #include "parse.h"
 #include "fft/fft.h"
+#include "types.h"
 
 #ifdef USE_GPU
 #include <cuda_runtime.h>
@@ -34,8 +35,6 @@ class Field
         void drift_k2_cpu(double dt);
         void drift_k2_gpu(double dt);
 
-        //double get_kSq(int idx); 
-        //void Poisson();
         void Poisson_cpu();
         void Poisson_gpu();
         void updatePotential();
@@ -57,9 +56,9 @@ class Field
         Complex* Vhat()     { return Vhat_; }
 
 #ifdef USE_GPU
-        cufftDoubleComplex* devicePsi()  { return d_psi_;  }
-        cufftDoubleReal*    deviceV()    { return d_V_;    }
-        cufftDoubleComplex* deviceVhat() { return d_Vhat_; }
+        CuComplex* devicePsi()  { return d_psi_;  }
+        CuReal*    deviceV()    { return d_V_;    }
+        CuComplex* deviceVhat() { return d_Vhat_; }
 #endif
         
         FFTBackend* fftBackend() const { return fft_backend_.get(); }
@@ -76,6 +75,7 @@ class Field
         Real rho_mean() const { return rho_mean_; }
         
         bool   verb()  const { return verb_;}
+        bool   gpu_active()  const { return gpu_active_;}
         int   curr()  const { return curr_;}
         double time()  const { return s_;}
         double ds()  const { return ds_;}
@@ -94,44 +94,42 @@ class Field
         void toDevice(); // Host to device
         void toHost();   // Device to host
         void syncVhatToHost(); // For spectrum
+        void syncVToDevice(); // For spectrum
 #endif
 
 
     private:
+        Complex*   psi_   = nullptr;
+        Complex*   Vhat_  = nullptr;
+        Real*      V_     = nullptr;
+
+#ifdef USE_GPU
+        CuComplex* d_psi_  = nullptr;
+        CuComplex* d_Vhat_ = nullptr;
+        CuReal*    d_V_    = nullptr;
+#endif
         
-        int N_;                 
-        int dim_;                 
-        int nthr_;
         double Lbox_;
         double norm_;
+        double ds_;
+        double s_;
+        double a_;
         
-        bool verb_;
-
-        int curr_ = 0;
-        int nsteps_ = 0;
-
-        int cosmo_;
-        double ds_;           // Code time step
-        double s_;            // s-time
-        double a_;            // Scale factor
-
-        size_t sites_ = 0;
-        size_t ksites_ = 0;
-
         Real Vmax_ = 0.0;
         Real rhomax_ = 0.0;
         Real rho_mean_;
 
-        Complex* psi_;
-        Complex* Vhat_;
-        Real*    V_;      
+        int    N_;
+        int    dim_;
+        int    nthr_;
+        int    cosmo_;
+        int    curr_   = 0;
+        int    nsteps_;
+        bool   verb_;
+        bool   gpu_active_ = false;
+        size_t sites_ = 0;
+        size_t ksites_ = 0;
 
-#ifdef USE_GPU
-        cufftDoubleComplex* d_psi_;
-        cufftDoubleComplex* d_Vhat_;
-        cufftDoubleReal*    d_V_;
-#endif
-        
         std::unique_ptr<FFTBackend> fft_backend_;
 };
 

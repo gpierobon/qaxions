@@ -177,6 +177,7 @@ endif
 
 ifeq ($(WITH_DOUBLE), 1)
     CXXFLAGS += -DUSE_DOUBLE
+    NVCC_FLAGS += -DUSE_DOUBLE
 endif
 
 # Pure library flags — only -l/-L entries, no compiler driver flags.

@@ -67,3 +67,40 @@
     #define SINCOS                   sincosf
 
 #endif
+
+
+#ifdef USE_GPU
+
+#include <cufft.h>
+
+#ifdef USE_DOUBLE
+    using CuComplex = cufftDoubleComplex;    // double2
+    using CuReal    = cufftDoubleReal;       // double
+                                             
+    #define CUFFT_C2C_TYPE  CUFFT_Z2Z
+    #define CUFFT_R2C_TYPE  CUFFT_D2Z
+    #define CUFFT_C2R_TYPE  CUFFT_Z2D
+
+    #define CUFFT_EXEC_C2C  cufftExecZ2Z
+    #define CUFFT_EXEC_R2C  cufftExecD2Z
+    #define CUFFT_EXEC_C2R  cufftExecZ2D
+
+    #define FABS  fabs
+    #define FMAX  fmax
+#else
+    using CuComplex = cufftComplex;          // float2
+    using CuReal    = cufftReal;             // float
+
+    #define CUFFT_C2C_TYPE  CUFFT_C2C
+    #define CUFFT_R2C_TYPE  CUFFT_R2C
+    #define CUFFT_C2R_TYPE  CUFFT_C2R
+
+    #define CUFFT_EXEC_C2C  cufftExecC2C
+    #define CUFFT_EXEC_R2C  cufftExecR2C
+    #define CUFFT_EXEC_C2R  cufftExecC2R
+    
+    #define FABS  fabsf
+    #define FMAX  fmaxf
+#endif
+
+#endif
