@@ -108,8 +108,13 @@ ifeq ($(PLATFORM),mac)
     HDF5_INC := -I$(BREW)/include
     HDF5_LIB := -L$(BREW)/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
 else
-    HDF5_INC := -I/usr/local/hdf5_serial/include
-    HDF5_LIB := -L/usr/local/hdf5_serial/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
+    ifeq ($(WITH_GADI), 1)
+    	HDF5_INC := -I/apps/hdf5/1.10.7/include
+    	HDF5_LIB := -L/apps/hdf5/1.10.7/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
+    else	
+    	HDF5_INC := -I/usr/local/hdf5_serial/include
+    	HDF5_LIB := -L/usr/local/hdf5_serial/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
+    endif
 endif
 
 # ------------------------------------------------------------------------------
@@ -121,8 +126,8 @@ ifeq ($(PLATFORM),mac)
     FFTW_LIB := -L$(BREW)/lib -lfftw3 -lfftw3f -lfftw3_omp -lfftw3f_omp
 else
     ifeq ($(WITH_GADI), 1)
-    	FFTW_INC := -I/apps/fftw3/3.3.10-nci1/include
-    	FFTW_LIB := -L/apps/fftw3/3.3.10-nci1/lib -lfftw3 -lfftw3f
+    	FFTW_INC := -I/apps/fftw3/3.3.8/include
+    	FFTW_LIB := -L/apps/fftw3/3.3.8/lib -lfftw3 -lfftw3f
 	FFTW_LIb += -lfftw3_omp_GNU -lfftw3f_omp_GNU
     else
 	FFTW_INC := -I/usr/local/fftw3/include
@@ -193,10 +198,10 @@ endif
 # Flags that contain compiler-driver options (-fopenmp, -Wl,... etc.) must be
 # wrapped with -Xlinker when nvcc is the linker, otherwise nvcc rejects them.
 ifeq ($(WITH_GPU),1)
-  ifeq ($(PLATFORM),linux)
-    LINK_FLAGS := -lgomp
+  ifeq ($(PLATFORM),mac)
+    LINK_FLAGS := -lomp
   else
-    LINK_FLAGS := $(OPENMP_LIB)
+    LINK_FLAGS := -lgomp
   endif
 else
     LINK_FLAGS := $(OPENMP_LIB)
