@@ -105,7 +105,7 @@ void printParams(const Field& f, const Params& p)
         switch (ic)
         {
             case ICType::SOLITONS: return "SOLITONS";
-            // case ICType::SPECTRUM: return "SPECTRUM";
+            case ICType::SPECTRUM: return "SPECTRUM";
             default: return "UNKNOWN";
         }
     };

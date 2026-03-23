@@ -25,6 +25,8 @@ typedef struct
     bool verb;
     bool readj;
 
+    unsigned int seed;
+
     std::string dir;
 
     ICType ictype;

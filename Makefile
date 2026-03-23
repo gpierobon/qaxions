@@ -110,10 +110,10 @@ ifeq ($(PLATFORM),mac)
 else
     ifeq ($(WITH_GADI), 1)
     	HDF5_INC := -I/apps/hdf5/1.10.7/include
-    	HDF5_LIB := -L/apps/hdf5/1.10.7/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
+    	HDF5_LIB := -L/apps/hdf5/1.10.7/lib -lhdf5_cpp -lhdf5 -lsz -lz -lm
     else	
     	HDF5_INC := -I/usr/local/hdf5_serial/include
-    	HDF5_LIB := -L/usr/local/hdf5_serial/lib -lhdf5_cpp -lhdf5 -lsz -lz -ldl -lm
+    	HDF5_LIB := -L/usr/local/hdf5_serial/lib -lhdf5_cpp -lhdf5 -lsz -lz -lm
     endif
 endif
 

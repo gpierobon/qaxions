@@ -31,3 +31,6 @@ massif.*
 src/debug_print.h
 prec_benchmark.sh
 scripts/plot_spectra.py
+
+Pk*.txt
+a.py

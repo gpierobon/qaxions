@@ -20,11 +20,12 @@ void defaults(Params& pars)
     pars.sol_bkg = 1.0;
     pars.verb = false;
     pars.readj = false;
+    pars.seed = 9;
 
     pars.dir = "output";
 
     pars.plan = FFTPlanType::ESTIMATE;
-    pars.ictype = ICType::SOLITONS;
+    pars.ictype = ICType::SOLITONS;      // To change into SPECTRUM
     pars.cosmotype = CosmoType::STATIC;
     pars.measinfo = MeasureType::NONE;
 }
@@ -43,6 +44,7 @@ void parseArgs(int argc, char* argv[], Params* pars)
         else if (arg == "--dt"    && i+1 < argc) { pars->dt     = atof(argv[++i]); }
         else if (arg == "--steps" && i+1 < argc) { pars->nsteps = atoi(argv[++i]); }
         else if (arg == "--nmeas" && i+1 < argc) { pars->nmeas  = atoi(argv[++i]); }
+        else if (arg == "--seed"  && i+1 < argc) { pars->seed   = atoi(argv[++i]); }
         else if (arg == "--dir"   && i+1 < argc) { pars->dir    = argv[++i]; }
         else if (arg == "--verb"               ) { pars->verb   = true; }
         else if (arg == "--readj"              ) { pars->readj  = true; }
@@ -62,8 +64,8 @@ void parseArgs(int argc, char* argv[], Params* pars)
         {
             std::string s = argv[++i];
             const std::unordered_map<std::string, ICType> map = {
-                {"solitons", ICType::SOLITONS}//,
-                //{"spectrum", ICType::SPECTRUM}
+                {"solitons", ICType::SOLITONS},
+                {"spectrum", ICType::SPECTRUM}
             };
             auto it = map.find(s);
             if (it != map.end())
