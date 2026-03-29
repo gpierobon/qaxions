@@ -22,6 +22,7 @@ bench3D/
 
 scripts/vista*
 scripts/.ipynb_checkpoints/
+scripts/*.ipynb
 
 docs/_site/
 
@@ -34,3 +35,6 @@ scripts/plot_spectra.py
 
 Pk*.txt
 a.py
+
+mac*
+gadi*

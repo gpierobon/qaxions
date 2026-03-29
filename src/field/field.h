@@ -78,6 +78,7 @@ class Field
         bool   verb()  const { return verb_;}
         bool   gpu_active()  const { return gpu_active_;}
         int   curr()  const { return curr_;}
+        double norm()  const { return norm_;}
         double time()  const { return s_;}
         double ds()  const { return ds_;}
         double a()  const { return a_;}

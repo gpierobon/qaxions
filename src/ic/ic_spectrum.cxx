@@ -77,13 +77,14 @@ void SpectrumIC::apply(Field& field) const
     PROFILE(IC);
 
     const int    N     = field.size();
+    const double a     = field.a();
     //const int    dim   = field.dim();
     const double L     = field.Lbox();
     const bool   verb  = field.verb();
     
     const double dk    = 2.0 * M_PI / L;
     const int    hN    = N / 2;
-    double       norm  = L * L;
+    double       norm  = L * L * std::sqrt(a);
 
     unsigned int seed = p_.seed;
     //const std::string pk_file = p_.pk_file; // ADD THIS

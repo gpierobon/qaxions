@@ -33,7 +33,7 @@ line, = ax.loglog([], [], c='C0')
 
 ax.set_xlabel("k")
 ax.set_ylabel(r"$\Delta^2_k$")
-#ax.set_ylim(1e-3, 15)
+ax.set_ylim(1e-5, 1e2)
 ax.legend()
 
 for fname in files:

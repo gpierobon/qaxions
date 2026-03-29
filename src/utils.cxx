@@ -122,26 +122,77 @@ void printParams(const Field& f, const Params& p)
         }
     };
 
+    auto measToString = [](uint32_t m) -> std::string
+    {
+        if (m == 0) return "NONE";
+
+        std::string result;
+        const std::pair<MeasureType, const char*> flags[] =
+        {
+            { MeasureType::SPECTRUM,  "SPECTRUM"  },
+            { MeasureType::RHO_MAX,   "RHO_MAX"   },
+            { MeasureType::RHO_SLICE, "RHO_SLICE" },
+            { MeasureType::RHO_GRID,  "RHO_GRID"  },
+            { MeasureType::PSI_GRID,  "PSI_GRID"  },
+        };
+
+        for (auto& [flag, name] : flags)
+        {
+            if (m & static_cast<uint32_t>(flag))
+            {
+                if (!result.empty()) 
+                    result += " | ";
+                result += name;
+            }
+        }
+
+        return result.empty() ? "UNKNOWN" : result;
+    };
+
+    auto cosmoToString = [](CosmoType ctype)
+    {
+        switch (ctype)
+        {
+            case CosmoType::STATIC: return "STATIC";
+            case CosmoType::MRE: return "MRE";
+            default: return "UNKNOWN";
+        }
+    };
+
     std::cout << " " << std::endl; 
     std::cout << "--------------------------------------------------\n";
     std::cout << "                    RUN PARAMETERS                \n";
     std::cout << "--------------------------------------------------\n";
 
+    std::cout << "Grid:\n";
     std::cout << "  dim            = " << f.dim() << "\n";
     std::cout << "  N              = " << f.size() << "\n";
     std::cout << "  Lbox           = " << f.Lbox() << "\n\n";
 
-    std::cout << "  dt             = " << p.dt << "\n";
-    std::cout << "  dtr            = " << p.dtr << "\n";
+    std::cout << "Physics:\n";
+    std::cout << "  Cosmo type     = " << cosmoToString(p.cosmotype) << "\n";
+    std::cout << "  dt (init)      = " << f.ds() << "\n";
     std::cout << "  nsteps         = " << p.nsteps << "\n";
-    std::cout << "  ai             = " << p.ai << "\n\n";
+    if (f.cosmo() == 1)
+        std::cout << "  a_i            = " << p.ai << "\n";
 
-    std::cout << "  norm           = " << p.norm << "\n";
-    std::cout << "  IC type        = " << icToString(p.ictype) << "\n\n";
+    std::cout << "  norm           = " << f.norm() << "\n";
+    std::cout << "  IC type        = " << icToString(p.ictype) << "\n";
+    std::cout << "  IC seed        = " << p.seed << "\n\n";
+
+    std::cout << "Measurement:\n";
+    std::cout << "  meas flag(s)   = " << measToString(static_cast<uint32_t>
+                                                       (p.measinfo)) << "\n";
+    std::cout << "  # meas         = " << p.nmeas << "\n\n";
 
     std::cout << "FFT:\n";
+#ifdef USE_GPU
+    std::cout << "  Backend        = cuFFT " << std::endl;
+#else 
+    std::cout << "  Backend        = FFTW " << std::endl;
     std::cout << "  plan           = " << fftToString(p.plan) << "\n";
-    std::cout << "  threads        = " << p.nthr << "\n\n";
+    std::cout << "  # threads      = " << p.nthr << "\n\n";
+#endif
 
     std::cout << "IO:\n";
     std::cout << "  output dir     = " << p.dir << "\n";

@@ -14,14 +14,14 @@ SCRIPT_DIR := scripts
 # ------------------------------------------------------------------------------
 
 # Default to double precision
-WITH_DOUBLE ?= 1
+WITH_DOUBLE ?= 0
 # Default with bindings, if pybind is found
-WITH_PYTHON ?= 1
+WITH_PYTHON ?= 0
 # For builds on HPC system Gadi (NCI)
 WITH_GADI   ?= 0
 # Enable GPU acceleration with 'make WITH_GPU=1'
 WITH_GPU    ?= 0
-# GPU architecture, sm_80 (A100), sm_90 (H200)
+# GPU architecture, sm_70 (gpuvolta), sm_90 (hopper, H200)
 GPU_ARCH    ?= sm_60
 
 # ------------------------------------------------------------------------------

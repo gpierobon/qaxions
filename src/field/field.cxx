@@ -170,7 +170,7 @@ void Field::computeEnergy()
     {
         Real re = psi_[idx][0];
         Real im = psi_[idx][1];
-        V_[idx]   = re * re + im * im;
+        V_[idx] = re * re + im * im;
     }
     
     if (verb_)

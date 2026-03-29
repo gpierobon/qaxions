@@ -14,8 +14,7 @@ nav_order: 1
 
 - Static Universe simulations to study the soliton interaction via gravity
 - Axion star/minicluster formation around matter-radiation equality
-- Fuzzy dark matter cosmological simulations 
-- Interface with [jaxions][jaxions repo] 
+- Interface with the [jaxions][jaxions repo] code
 
 ## Obtain the code
 
@@ -30,7 +29,7 @@ git clone https://gitlab.com/gpierobon/qaxions.git
 - High-performance C++ core
 - OpenMP parallelism
 - HDF5 and FFTW support
-- GPU acceleration with CUDA/cuFFT
+- GPU acceleration with CUDA and cuFFT
 - Python bindings via `pybind11`
 - Linux and macOS support
 
@@ -53,7 +52,7 @@ git clone https://gitlab.com/gpierobon/qaxions.git
 │   └── main.cxx            ← main program
 │ 
 ├── pyqaxions/        # Python package (generated at build time for the tests)
-├── scritps/          # Python package (generated at build time for the tests)
+├── scripts/          # Visualisation scripts (bash + python)
 ├── tests/            # Testing scripts from pybind11
 ├── build/            # Build artifacts
 ├── bin/              # Binary files for plotting

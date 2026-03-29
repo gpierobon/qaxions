@@ -42,7 +42,7 @@ for fname in files:
         im = ax.imshow(
             logdens,
             cmap=cmr.pride,
-            vmin=-0.5,
+            vmin=-1,
             vmax=2,
             origin="lower"
         )
