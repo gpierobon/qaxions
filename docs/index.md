@@ -32,6 +32,7 @@ git clone https://gitlab.com/gpierobon/qaxions.git
 - GPU acceleration with CUDA and cuFFT
 - Python bindings via `pybind11`
 - Linux and macOS support
+- Visualisation scripts
 
 ## Repository layout
 
