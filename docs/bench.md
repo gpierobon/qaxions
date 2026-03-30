@@ -64,9 +64,9 @@ differing only in the platform and parallelisation backend.
 
 | Platform | Compiler / Runtime | Threads | Runtime (s) |
 |----------|--------------------|---------|-------------|
-| Apple M4 | clang 17 | 10 | 1050 |
-| Intel Xeon 8268 | gcc 14 | 12 | 1183 |
-| Nvidia V100-SXM2 | CUDA 12.9 | — | 27.3 |
+| Apple M4 (2024)| clang 17 | 10 | 1050 |
+| Intel Xeon 8268 (2019)| gcc 14 | 12 | 1183 |
+| Nvidia V100-SXM2 (2018)| CUDA 12.9 | — | 27.3 |
 
 <img src="{{ site.baseurl }}/assets/img/CPU_GPU.png" alt="CPU vs GPU runtime" width="70%">
 
