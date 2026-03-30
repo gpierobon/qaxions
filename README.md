@@ -17,5 +17,5 @@
 
 ## Documentation
 
-A documentation on the installation and features can be found [here](https://qaxions-8f911f.gitlab.io/)
+A documentation on the installation and features can be found [here](https://gpierobon.github.io/qaxions)
 
