@@ -8,7 +8,7 @@ plt.style.use('scripts/sty.mplstyle')
 
 data_dir = sys.argv[1]
 speed    = float(sys.argv[2])
-pattern = os.path.join(data_dir, "spec_*.txt")
+pattern = os.path.join(data_dir, "spec/spec_*.txt")
 files = sorted(glob.glob(pattern))
 
 if len(files) < 1:

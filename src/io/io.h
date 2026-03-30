@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include "../parse.h"
+#include "../core/types.h"
 
 enum class FileMode
 {
@@ -29,6 +30,8 @@ class IO
         void readConf(Params& p, Field& field); // For "native" grids
         void readJaxions(Params& p, Field& field); // For jaxions grids with m, v
         void writeConf(const Field& field, bool save_psi = false);
+        void writeMeas(const Field& field, const std::vector<Real>& slice,
+                       bool write_slice, bool write_rhomax);
 
     private:
         hid_t file_id_;

@@ -189,6 +189,37 @@ void Field::computeEnergy()
     rhomax_ = local_max / avg;  
 }
 
+std::vector<Real> Field::computeProjection()
+{
+    if (verb_)
+        std::cout << "[computeProjection] Starting loop ..." << std::endl;
+
+    size_t N = static_cast<size_t>(N_);
+    std::vector<Real> slice(N * N, 0.0);
+
+    #pragma omp parallel for collapse(2)
+    for (size_t iy = 0; iy < N; ++iy)
+    for (size_t ix = 0; ix < N; ++ix)
+    {
+        size_t idx2 = ix + N * iy;
+        for (size_t iz = 0; iz < N; ++iz)
+        {
+            size_t idx3 = ix + N * (iy + N * iz);
+            slice[idx2] += V_[idx3];
+        }
+    }
+
+    for (auto& val : slice)
+        val /= static_cast<Real>(N_);
+
+    if (verb_)
+        std::cout << "[computeProjection] done!" << std::endl;
+
+    return slice;
+
+}
+
+
 void Field::updatePotential()
 {
 #ifdef USE_GPU

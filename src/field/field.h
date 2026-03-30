@@ -43,6 +43,7 @@ class Field
         void updatePotential_gpu();
 
         void computeEnergy();
+        std::vector<Real> computeProjection();
         void updateTime();
 
         const Complex* psi() const { return psi_; }   

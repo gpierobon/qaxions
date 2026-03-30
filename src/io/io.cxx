@@ -328,17 +328,6 @@ void IO::writeConf(const Field& field, bool save_psi)
     else // dim == 2
         dims = {static_cast<hsize_t>(N), static_cast<hsize_t>(N), 1};
     
-    std::vector<Real> rho(sites);
-    const Real* V = field.V();
-
-    #pragma omp parallel for
-    for (size_t i = 0; i < sites; ++i)
-        rho[i] = V[i];
-    
-    const std::string rho_group = "rho";
-    createGroup(rho_group);
-    writeDataset(rho.data(), H5T_REAL, dims, "data", rho_group);
-
     if (save_psi)
     {
         std::vector<Real> real_part(sites), imag_part(sites);
@@ -356,6 +345,19 @@ void IO::writeConf(const Field& field, bool save_psi)
         writeDataset(real_part.data(), H5T_REAL, dims, "real", psi_group);
         writeDataset(imag_part.data(), H5T_REAL, dims, "imag", psi_group);
     }
+    else
+    {
+        std::vector<Real> rho(sites);
+        const Real* V = field.V();
+
+        #pragma omp parallel for
+        for (size_t i = 0; i < sites; ++i)
+            rho[i] = V[i];
+        
+        const std::string rho_group = "rho";
+        createGroup(rho_group);
+        writeDataset(rho.data(), H5T_REAL, dims, "data", rho_group);
+    }
     
     
     createGroup("Header");
@@ -368,3 +370,39 @@ void IO::writeConf(const Field& field, bool save_psi)
 
 }
 
+void IO::writeMeas(const Field& field,
+                   const std::vector<Real>& slice,
+                   bool write_slice,
+                   bool write_rhomax)
+{
+    PROFILE(IO);
+
+    const int N       = field.size();
+    const int dim     = field.dim();
+    const int curr    = field.curr();
+    const double Lbox = field.Lbox();
+    const double time = field.time();
+    const double a    = field.a();
+
+    if (write_rhomax)
+    {
+        createGroup("Meas");
+        writeAttribute<double>("Meas", "rhomax", field.rhomax());
+    }
+
+    if (write_slice)
+    {
+        std::array<hsize_t,3> dims = {static_cast<hsize_t>(N),
+                                      static_cast<hsize_t>(N), 1};
+        createGroup("P");
+        writeDataset(slice.data(), H5T_REAL, dims, "data", "P");
+    }
+
+    createGroup("Header");
+    writeAttribute<int>   ("Header", "N",    N);
+    writeAttribute<int>   ("Header", "dim",  dim);
+    writeAttribute<int>   ("Header", "step", curr);
+    writeAttribute<double>("Header", "time", time);
+    writeAttribute<double>("Header", "a",    a);
+    writeAttribute<double>("Header", "Lbox", Lbox);
+}
