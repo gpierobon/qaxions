@@ -35,26 +35,10 @@ int main( int argc, char* argv[] )
     std::unique_ptr<Field> field;
 
     // ICs, read or create
-    if (pars.readj)
-    {
-        field = std::make_unique<Field>();
-        { 
-            PROFILE(IC);
-            IO reader("jaxions_2D.hdf5", FileMode::ReadOnly);
-            reader.readJaxions(pars, *field);
-        }
-        std::cout << "\nField created, it took " << timeSince(start) << std::endl;
-        std::cout << "Restart successful. Grid: N=" << field->size()
-                  << ", dim=" << field->dim()
-                  << ", sites=" << field->sites() << "\n";
-    }
-    else
-    {
-        field = std::make_unique<Field>(pars);
-        auto ic = createIC(pars.ictype, pars);
-        ic->apply(*field);
-        std::cout << "\nField created, it took " << timeSince(start) << "\n\n";
-    }
+    field = std::make_unique<Field>(pars);
+    auto ic = createIC(pars.ictype, pars);
+    ic->apply(*field);
+    std::cout << "\nField created, it took " << timeSince(start) << "\n\n";
 
     printParams(*field, pars);
     

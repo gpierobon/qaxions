@@ -106,6 +106,7 @@ void printParams(const Field& f, const Params& p)
         {
             case ICType::SOLITONS: return "SOLITONS";
             case ICType::SPECTRUM: return "SPECTRUM";
+            case ICType::JAXIONS:  return "JAXIONS";
             default: return "UNKNOWN";
         }
     };
@@ -180,6 +181,8 @@ void printParams(const Field& f, const Params& p)
     std::cout << "  IC type        = " << icToString(p.ictype) << "\n";
     if (p.ictype == ICType::SPECTRUM)
         std::cout << "  IC file        = " << p.pk_file << "\n";
+    if (p.ictype == ICType::JAXIONS)
+        std::cout << "  IC file        = " << p.ic_file << "\n";
     std::cout << "  IC seed        = " << p.seed << "\n\n";
 
     std::cout << "Measurement:\n";
@@ -213,22 +216,42 @@ void printHelp()
     Usage:
       ./qaxions [options]
 
-    Options:
+    Grid options:
       --dim    <int>     Grid dimension (default: 3)
-      --N      <int>     Grid size (default: 64)
-      --nthr   <int>     Number of threads per process (default: 1)
-      --ai     <float>   Initial scale factor (default: 0.1)
-      --norm   <float>   Poisson's equation normalisation
-      --dt     <float>   Time step
+      --N      <int>     Grid size per side (default: 64)
+      --Lbox   <float>   Physical box length (default: 1.0)
+
+    Physics options:
+      --cosmo  <int>     Cosmology type: static (0) | MRE (1)
+      --ai     <float>   Initial scale factor (used when cosmo=1, default: 0.1)
+      --norm   <float>   Poisson equation normalisation
+      --dt     <float>   Initial time step
       --steps  <int>     Number of time steps
+      --ic     <int>     IC type: solitons (0) | spectrum (1) | jaxions (2)
+      --pkfile <string>  Power spectrum file (required for --ic 1)
+      --icfile <string>  Jaxions HDF5 restart file (required for --ic 2)
+      --seed   <int>     Random seed for IC generation
+
+    Measurement options:
       --nmeas  <int>     Number of measurements
-      --meas   <int>     Type of measurements (use --measinfo)
-      --t      <float>   Final time
-      --fft    <int>     FFTW plan: estimate (0) | measure (1) | patient | exhaustive
-      --help          Show help
+      --meas   <int>     Measurement flags (combinable via bitwise OR):
+                           SPECTRUM  = 1
+                           RHO_MAX   = 2
+                           RHO_SLICE = 4
+                           RHO_GRID  = 8
+                           PSI_GRID  = 16
+
+    FFT options:
+      --fft    <int>     FFTW plan: estimate (0) | measure (1) | patient (2) | exhaustive (3)
+      --nthr   <int>     Number of OpenMP threads (default: 1)
+
+    IO options:
+      --dir    <string>  Output directory
+      --verb             Enable verbose output
+
+      --help             Show this help message
     )";
 }
-
 
 void printBanner()
 {

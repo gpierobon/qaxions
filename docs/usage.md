@@ -58,7 +58,6 @@ Spectrum initial conditions and expanding cosmology:
 | `--dir <path>` | string | `output` | Output directory |
 | `--meas <int>` | integer | `0` (NONE) | Measurement flags (bitmask, see below) |
 | `--verb` | boolean flag | `false` | Enable verbose output |
-| `--readj` | boolean flag | `false` | Enable re-adjustment |
 
 ### Performance
 

@@ -19,11 +19,11 @@ void defaults(Params& pars)
     pars.norm = 4000;
     pars.sol_bkg = 1.0;
     pars.verb = false;
-    pars.readj = false;
     pars.seed = 9;
 
     pars.dir = "output";
     pars.pk_file = "Pk.txt";
+    pars.ic_file = "jaxions_2D.hdf5";
 
     pars.plan = FFTPlanType::ESTIMATE;
     pars.ictype = ICType::SOLITONS;      // To change into SPECTRUM
@@ -49,7 +49,6 @@ void parseArgs(int argc, char* argv[], Params* pars)
         else if (arg == "--dir"    && i+1 < argc) { pars->dir     = argv[++i]; }
         else if (arg == "--pkfile" && i+1 < argc) { pars->pk_file = argv[++i]; }
         else if (arg == "--verb"               ) { pars->verb   = true; }
-        else if (arg == "--readj"              ) { pars->readj  = true; }
         else if (arg == "--meas"               )
         {
             pars->measinfo = parseMeasureType(atoi(argv[++i]));
@@ -67,7 +66,8 @@ void parseArgs(int argc, char* argv[], Params* pars)
             std::string s = argv[++i];
             const std::unordered_map<std::string, ICType> map = {
                 {"solitons", ICType::SOLITONS},
-                {"spectrum", ICType::SPECTRUM}
+                {"spectrum", ICType::SPECTRUM}, 
+                {"jaxions",  ICType::JAXIONS}
             };
             auto it = map.find(s);
             if (it != map.end())

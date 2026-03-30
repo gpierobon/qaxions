@@ -15,6 +15,6 @@ class InitialCondition
 };
 
 // Factory
-std::unique_ptr<InitialCondition> createIC(ICType type, const Params& p);
+std::unique_ptr<InitialCondition> createIC(ICType type, Params& p);
 
 #endif

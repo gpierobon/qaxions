@@ -23,12 +23,12 @@ typedef struct
     double sol_bkg;
 
     bool verb;
-    bool readj;
 
     unsigned int seed;
 
     std::string dir;
     std::string pk_file;
+    std::string ic_file;
 
     ICType ictype;
     CosmoType cosmotype;

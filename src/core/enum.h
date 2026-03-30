@@ -6,7 +6,8 @@
 enum class ICType
 {
     SOLITONS,
-    SPECTRUM
+    SPECTRUM, 
+    JAXIONS
 };
 
 enum class CosmoType
