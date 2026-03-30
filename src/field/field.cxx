@@ -1,6 +1,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 #include <omp.h>
 
 #include "field.h"
@@ -99,6 +100,7 @@ void Field::setCosmo(Params& p)
             ds_ = p.dt;
             rho_mean_ = 1.0;
             norm_ = 4 * M_PI * p.norm;
+            dsD_  = 2.0 * (Lbox_ / N_) * (Lbox_ / N_) / M_PI;
             break;
 
         case CosmoType::MRE:
@@ -284,7 +286,12 @@ void Field::updateTime()
     // Get ctype??
     curr_ += 1; 
 
-    if (cosmo_ == 1)
+    if (cosmo_ == 0)
+    {
+        double ds_min = std::min({ds_, dsK_, dsD_});
+        ds_ = ds_min;
+    }
+    else if (cosmo_ == 1)
     {
         ds_ = 0.00025/a_;
         a_  = a_ * (1 + 1.27 * 1.27 * std::sqrt(1 + a_ ) * ds_);

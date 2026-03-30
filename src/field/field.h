@@ -117,6 +117,9 @@ class Field
         double ds_;
         double s_;
         double a_;
+
+        double dsD_;
+        double dsK_;
         
         Real Vmax_ = 0.0;
         Real rhomax_ = 0.0;

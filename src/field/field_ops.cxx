@@ -222,6 +222,7 @@ void Field::updatePotential_cpu()
         if (absV > local_max) local_max = absV;
     }
     Vmax_ = local_max;  
+    dsK_ = 2.0 * M_PI / Vmax_;
 }
 
 

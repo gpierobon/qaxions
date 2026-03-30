@@ -228,6 +228,7 @@ void Field::updatePotential_gpu()
     Vmax_ = 0.0;
     for (int i = 0; i < n_blocks; ++i)
         if (h_block_max[i] > Vmax_) Vmax_ = h_block_max[i];
+    dsK_ = 2.0 * M_PI / Vmax_;
 }
 
 #endif
