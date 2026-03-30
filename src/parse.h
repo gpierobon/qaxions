@@ -28,6 +28,7 @@ typedef struct
     unsigned int seed;
 
     std::string dir;
+    std::string pk_file;
 
     ICType ictype;
     CosmoType cosmotype;

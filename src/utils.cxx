@@ -178,6 +178,8 @@ void printParams(const Field& f, const Params& p)
 
     std::cout << "  norm           = " << f.norm() << "\n";
     std::cout << "  IC type        = " << icToString(p.ictype) << "\n";
+    if (p.ictype == ICType::SPECTRUM)
+        std::cout << "  IC file        = " << p.pk_file << "\n";
     std::cout << "  IC seed        = " << p.seed << "\n\n";
 
     std::cout << "Measurement:\n";

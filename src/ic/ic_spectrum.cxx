@@ -76,9 +76,12 @@ void SpectrumIC::apply(Field& field) const
 {
     PROFILE(IC);
 
+    const int    dim   = field.dim();
+    if (dim != 3)
+        throw std::runtime_error("Can't run 2D simulations with spectrum IC!");
+
     const int    N     = field.size();
     const double a     = field.a();
-    //const int    dim   = field.dim();
     const double L     = field.Lbox();
     const bool   verb  = field.verb();
     
@@ -87,11 +90,11 @@ void SpectrumIC::apply(Field& field) const
     double       norm  = L * L * std::sqrt(a);
 
     unsigned int seed = p_.seed;
-    //const std::string pk_file = p_.pk_file; // ADD THIS
+    const std::string pk_file = p_.pk_file;
     
     PowerSpectrum pk;
     
-    pk = readPowerSpectrum("Pk.txt", verb);
+    pk = readPowerSpectrum(pk_file, verb);
 
     if (verb)
         std::cout << "[IC spectrum] Grid loop ..." << std::endl;
@@ -102,8 +105,6 @@ void SpectrumIC::apply(Field& field) const
         std::mt19937_64 local_rng(seed + thread_id);
         std::normal_distribution<double> local_gauss(0.0, 1.0);
         
-        // ADD 2D?
-        //
         #pragma omp for collapse(3) schedule(static)
         for (int iz = 0; iz < N; ++iz)
         for (int iy = 0; iy < N; ++iy)

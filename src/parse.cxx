@@ -23,6 +23,7 @@ void defaults(Params& pars)
     pars.seed = 9;
 
     pars.dir = "output";
+    pars.pk_file = "Pk.txt";
 
     pars.plan = FFTPlanType::ESTIMATE;
     pars.ictype = ICType::SOLITONS;      // To change into SPECTRUM
@@ -35,17 +36,18 @@ void parseArgs(int argc, char* argv[], Params* pars)
 {
     for (int i = 1; i < argc; ++i)
     {
-        std::string arg = argv[i];
-        if      (arg == "--N"     && i+1 < argc) { pars->N      = atoi(argv[++i]); }
-        if      (arg == "--nthr"  && i+1 < argc) { pars->nthr   = atoi(argv[++i]); }
-        else if (arg == "--ai"    && i+1 < argc) { pars->ai     = atof(argv[++i]); }
-        else if (arg == "--norm"  && i+1 < argc) { pars->norm   = atof(argv[++i]); }
-        else if (arg == "--L"     && i+1 < argc) { pars->Lbox   = atof(argv[++i]); }
-        else if (arg == "--dt"    && i+1 < argc) { pars->dt     = atof(argv[++i]); }
-        else if (arg == "--steps" && i+1 < argc) { pars->nsteps = atoi(argv[++i]); }
-        else if (arg == "--nmeas" && i+1 < argc) { pars->nmeas  = atoi(argv[++i]); }
-        else if (arg == "--seed"  && i+1 < argc) { pars->seed   = atoi(argv[++i]); }
-        else if (arg == "--dir"   && i+1 < argc) { pars->dir    = argv[++i]; }
+        std::string arg = argv[i]; 
+        if      (arg == "--N"      && i+1 < argc) { pars->N       = atoi(argv[++i]); }
+        if      (arg == "--nthr"   && i+1 < argc) { pars->nthr    = atoi(argv[++i]); }
+        else if (arg == "--ai"     && i+1 < argc) { pars->ai      = atof(argv[++i]); }
+        else if (arg == "--norm"   && i+1 < argc) { pars->norm    = atof(argv[++i]); }
+        else if (arg == "--L"      && i+1 < argc) { pars->Lbox    = atof(argv[++i]); }
+        else if (arg == "--dt"     && i+1 < argc) { pars->dt      = atof(argv[++i]); }
+        else if (arg == "--steps"  && i+1 < argc) { pars->nsteps  = atoi(argv[++i]); }
+        else if (arg == "--nmeas"  && i+1 < argc) { pars->nmeas   = atoi(argv[++i]); }
+        else if (arg == "--seed"   && i+1 < argc) { pars->seed    = atoi(argv[++i]); }
+        else if (arg == "--dir"    && i+1 < argc) { pars->dir     = argv[++i]; }
+        else if (arg == "--pkfile" && i+1 < argc) { pars->pk_file = argv[++i]; }
         else if (arg == "--verb"               ) { pars->verb   = true; }
         else if (arg == "--readj"              ) { pars->readj  = true; }
         else if (arg == "--meas"               )
