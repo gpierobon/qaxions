@@ -1,10 +1,9 @@
 title: qaxions
 theme: just-the-docs
-url: https://gpierobon.gitlab.io/qaxions
+#url: https://gpierobon.gitlab.io/qaxions
+url: "https://gpierobon.github.io"
+baseurl: "/qaxions"
 
-#markdown:  kramdown
 kramdown:
   math_engine: mathjax
   syntax_highlighter: rouge
-#kramdown:
-#  math_engine: null
