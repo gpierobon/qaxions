@@ -49,25 +49,39 @@ communication overhead and non-parallelisable portions of the code (Amdahl's Law
 
 ---
 
-## Weak Scaling
+## CPU vs GPU Runtime
 
-Problem size grows proportionally with thread count, so an ideal implementation
-maintains constant runtime.
+The following benchmark measures the wall-clock runtime of a fixed test run
+across three platforms:
+
+- **Grid size:** $256^3$
+- **Steps:** 1000
+
+All runs use the same initial conditions, output settings, and build flags,
+differing only in the platform and parallelisation backend.
 
 ### Results
 
-| Threads | Problem size | Runtime (s) |
-|:---:|:---:|:---:|
-| 1 | 128 | — |
-| 2 | 256 | — |
-| 4 | 512 | — |
-| 8 | 1024 | — |
-| 16 | 2048 | — |
+| Platform | Compiler / Runtime | Threads | Runtime (s) |
+|----------|--------------------|---------|-------------|
+| Apple M4 | clang 17 | 10 | 1050 |
+| Intel Xeon 8268 | gcc 14 | 12 | 1183 |
+| Nvidia V100-SXM2 | CUDA 12.9 | — | 27.3 |
 
-<!--- ![Weak scaling runtime](weak_scaling.png) --->
+<img src="{{ site.baseurl }}/assets/img/CPU_GPU.png" alt="CPU vs GPU runtime" width="70%">
+
+### GPU Speedup
+
+The V100 GPU completes the same run in about 27 s, compared to more than 1000 s on
+the Apple M4 and on the Xeon 8268. This corresponds to a speedup of
+roughly **39×** over the M4 and **43×** over the Xeon.
+
+The speedup is driven primarily by the GPU-accelerated FFT (cuFFT), which
+dominates the cost of each time step at this grid size. The benefit is expected
+to grow further at larger $N$, where the FFT cost scales as $N^3 \log N$ and
+the GPU's parallelism is more fully utilised.
 
 ---
-
 ## Conclusions
 
 - **Strong scaling** is efficient up to $\mathcal{O}(20)$ threads, beyond which communication overhead
