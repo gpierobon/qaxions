@@ -24,6 +24,10 @@ To download the source code from the public repository use:
 git clone https://gitlab.com/gpierobon/qaxions.git
 ```
 
+```
+git clone https://github.com/gpierobon/qaxions.git
+```
+
 ## Features
 
 - High-performance C++ core
