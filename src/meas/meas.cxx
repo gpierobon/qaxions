@@ -48,8 +48,10 @@ void measure(Field& f, const Params& p, size_t measNumber, Clock::time_point st)
         IO io(fname.str());
 
         std::vector<Real> slice;
-        bool write_slice  = meas & MeasureType::RHO_SLICE;
         bool write_rhomax = meas & MeasureType::RHO_MAX;
+        bool write_slice  = meas & MeasureType::RHO_SLICE;
+        if (f.dim() != 3)
+            write_slice = false;
 
         if (write_slice)
             slice = f.computeProjection();

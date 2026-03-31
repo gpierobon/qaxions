@@ -317,10 +317,14 @@ void IO::writeConf(const Field& field, bool save_psi)
     const int N = field.size();
     const int dim = field.dim();
     const int curr = field.curr();
+    const int cosmo   = field.cosmo();
     const double Lbox = field.Lbox();
     const double time = field.time();
+    const double tJ   = field.timeJ();
     const double a = field.a();
     const size_t sites = field.sites();
+    
+    const double tnorm = time/tJ;
 
     std::array<hsize_t,3> dims;
     if (dim == 3) 
@@ -364,7 +368,9 @@ void IO::writeConf(const Field& field, bool save_psi)
     writeAttribute<int>   ("Header", "N",     N);
     writeAttribute<int>   ("Header", "dim",   dim);
     writeAttribute<int>   ("Header", "step",  curr);
+    writeAttribute<int>   ("Header", "cosmo",cosmo);
     writeAttribute<double>("Header", "time",  time);
+    writeAttribute<double>("Header", "tnorm",tnorm);
     writeAttribute<double>("Header", "a",     a);
     writeAttribute<double>("Header", "Lbox",  Lbox);
 

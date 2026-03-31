@@ -99,7 +99,6 @@ void Field::setCosmo(Params& p)
             s_ = 0;
             sJ_ = 1 / std::sqrt(4.0 * M_PI * p.alpha);
             lJ_ = 1 / std::pow(p.alpha, 0.25);
-            std::cout << std::setprecision(5) << lJ_ << std::endl;
             ds_ = p.dt;
             rho_mean_ = 1.0;
             alpha_ = 4 * M_PI * p.alpha;
