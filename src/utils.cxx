@@ -69,14 +69,25 @@ void printStatus(const Field& f, int step, size_t num_steps, int meas,
 
     double rhomax = f.rhomax();
     double a = f.a();
+    double t = f.time();
+    double tJ = f.timeJ();
+    int cosmo = f.cosmo();
 
     std::cout << "============================================================="
               << "=====================================\n";
     std::cout << std::fixed    <<  std::setprecision(1)
-              << std::setw(6)  << "Meas #"    << std::setw(4) << meas 
-              << std::setw(2)  << " |   a: "
-              << std::setw(8) << std::setprecision(4) << a
-              << std::setw(2)  << " |   max(δ): "
+              << std::setw(6)  << "Meas #"    << std::setw(4) << meas;
+    if (cosmo == 0)
+    {
+        std::cout << std::setw(2)  << " |   t/tJ: "
+                  << std::setw(8) << std::setprecision(4) << t/tJ;
+    }
+    else
+    {
+        std::cout << std::setw(2)  << " |   a: "
+                  << std::setw(8) << std::setprecision(4) << a;
+    }
+    std::cout << std::setw(2)  << " |   max(δ): "
               << std::setw(12) << std::setprecision(5) << rhomax
               << std::setw(4)  << "    |  "        << std::setw(6) << std::setprecision(1) << percent << "%"
               << std::setw(12) << "Walltime:"  << " " << std::setw(12) << time_str << std::endl;
@@ -177,7 +188,7 @@ void printParams(const Field& f, const Params& p)
     if (f.cosmo() == 1)
         std::cout << "  a_i            = " << p.ai << "\n";
 
-    std::cout << "  norm           = " << f.norm() << "\n";
+    std::cout << "  alpha          = " << p.alpha << "\n";
     std::cout << "  IC type        = " << icToString(p.ictype) << "\n";
     if (p.ictype == ICType::SPECTRUM)
         std::cout << "  IC file        = " << p.pk_file << "\n";
@@ -224,7 +235,7 @@ void printHelp()
     Physics options:
       --cosmo  <int>     Cosmology type: static (0) | MRE (1)
       --ai     <float>   Initial scale factor (used when cosmo=1, default: 0.1)
-      --norm   <float>   Poisson equation normalisation
+      --alpha  <float>   Control parameter for collapse (default: 4000)
       --dt     <float>   Initial time step
       --steps  <int>     Number of time steps
       --ic     <int>     IC type: solitons (0) | spectrum (1) | jaxions (2)

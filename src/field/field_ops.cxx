@@ -181,7 +181,7 @@ void Field::updatePotential_cpu()
 {
     PROFILE(POISSON);
 
-    const Real pref = norm_ * a_;
+    const Real pref = alpha_ * a_;
 
     #pragma omp parallel for simd //schedule(static)
     for (size_t i=0; i < sites_; ++i) 

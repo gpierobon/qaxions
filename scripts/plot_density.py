@@ -38,9 +38,13 @@ im = None
 
 for fname in files:
     with h5.File(fname, "r") as f:
-        N   = int(f['Header'].attrs['N'])
-        dim = int(f['Header'].attrs['dim'])
-        a   = float(f['Header'].attrs['a'])
+        N     = int(f['Header'].attrs['N'])
+        dim   = int(f['Header'].attrs['dim'])
+        cosmo = int(f['Header'].attrs['cosmo'])
+        if cosmo == 0:
+            time = float(f['Header'].attrs['tnorm'])
+        else:
+            time = float(f['Header'].attrs['a'])
 
         if use_meas:
             rho = np.array(f['P/data']).reshape(N, N)
@@ -69,8 +73,10 @@ for fname in files:
         cbar.set_label(r"$\log_{10}(\rho/\bar{\rho})$")
     else:
         im.set_data(logdens)
-
-    ax.set_title(r'$a = %.4f$' % a)
+    if cosmo == 0:
+        ax.set_title(r'$t/t_J = %.4f$' % time)
+    else:
+        ax.set_title(r'$a = %.4f$' % time)
     plt.pause(speed)
 
 plt.ioff()

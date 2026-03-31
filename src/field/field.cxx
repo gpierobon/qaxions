@@ -97,9 +97,12 @@ void Field::setCosmo(Params& p)
             cosmo_ = 0;
             a_ = 1.0;
             s_ = 0;
+            sJ_ = 1 / std::sqrt(4.0 * M_PI * p.alpha);
+            lJ_ = 1 / std::pow(p.alpha, 0.25);
+            std::cout << std::setprecision(5) << lJ_ << std::endl;
             ds_ = p.dt;
             rho_mean_ = 1.0;
-            norm_ = 4 * M_PI * p.norm;
+            alpha_ = 4 * M_PI * p.alpha;
             dsD_  = 2.0 * (Lbox_ / N_) * (Lbox_ / N_) / M_PI;
             break;
 
@@ -108,7 +111,7 @@ void Field::setCosmo(Params& p)
             a_ = p.ai;
             ds_ = p.dt/a_;
             rho_mean_ = 1.5 * (2.0 * M_PI) * (2.0 * M_PI) * 1.27 * 1.27;
-            norm_ = 1.0;
+            alpha_ = 1.0;
             //s_ = getTime(a_); // TO IMPLEMENT
             break;
     }

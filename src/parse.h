@@ -19,7 +19,7 @@ typedef struct
     double dt;
     int nsteps;
     int nmeas;
-    double norm;
+    double alpha;
     double sol_bkg;
 
     bool verb;

@@ -79,8 +79,10 @@ class Field
         bool   verb()  const { return verb_;}
         bool   gpu_active()  const { return gpu_active_;}
         int   curr()  const { return curr_;}
-        double norm()  const { return norm_;}
+        double alpha()  const { return alpha_;}
         double time()  const { return s_;}
+        double timeJ()  const { return sJ_;}
+        double lJ()  const { return lJ_;}
         double ds()  const { return ds_;}
         double a()  const { return a_;}
         int   nsteps()  const { return nsteps_;}
@@ -113,13 +115,16 @@ class Field
 #endif
         
         double Lbox_;
-        double norm_;
+        double alpha_;
         double ds_;
         double s_;
         double a_;
 
         double dsD_;
         double dsK_;
+        
+        double sJ_;
+        double lJ_;
         
         Real Vmax_ = 0.0;
         Real rhomax_ = 0.0;

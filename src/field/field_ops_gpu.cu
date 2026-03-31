@@ -189,7 +189,7 @@ void Field::updatePotential_gpu()
 {
     PROFILE(POISSON);
     //{ toDevice(); }
-    const Real pref  = norm_ * a_;
+    const Real pref  = alpha_ * a_;
     const Real twopi = 2.0 * M_PI / Lbox_;
     const Real vol   = (dim_ == 3) ? N_*N_*N_ : N_*N_;
 

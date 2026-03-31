@@ -16,7 +16,7 @@ void defaults(Params& pars)
     pars.dt = 0.0001;
     pars.nsteps = 10;
     pars.nmeas = 20;
-    pars.norm = 4000;
+    pars.alpha = 4000;
     pars.sol_bkg = 1.0;
     pars.verb = false;
     pars.seed = 9;
@@ -40,7 +40,7 @@ void parseArgs(int argc, char* argv[], Params* pars)
         if      (arg == "--N"      && i+1 < argc) { pars->N       = atoi(argv[++i]); }
         if      (arg == "--nthr"   && i+1 < argc) { pars->nthr    = atoi(argv[++i]); }
         else if (arg == "--ai"     && i+1 < argc) { pars->ai      = atof(argv[++i]); }
-        else if (arg == "--norm"   && i+1 < argc) { pars->norm    = atof(argv[++i]); }
+        else if (arg == "--alpha"  && i+1 < argc) { pars->alpha   = atof(argv[++i]); }
         else if (arg == "--L"      && i+1 < argc) { pars->Lbox    = atof(argv[++i]); }
         else if (arg == "--dt"     && i+1 < argc) { pars->dt      = atof(argv[++i]); }
         else if (arg == "--steps"  && i+1 < argc) { pars->nsteps  = atoi(argv[++i]); }

@@ -46,7 +46,7 @@ Spectrum initial conditions and expanding cosmology:
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--ai <float>` | float | `0.1` | Initial scale factor |
-| `--norm <float>` | float | `4000` | Field normalisation |
+| `--alpha <float>` | float | `4000` | Gravity strength |
 | `--seed <int>` | integer | `9` | Random seed |
 | `--ic <string>` | string | `solitons` | Initial condition type: `solitons` or `spectrum` |
 | `--cosmo <int>` | integer | `0` | Cosmology type: `0` = static, `1` = expanding |

@@ -87,8 +87,10 @@ void SolitonsIC::apply(Field& field) const
             double dy = y - sol.y * L;
             double dz = (dim == 3) ? (z - sol.z * L) : 0.0;
             double r2 = dx*dx + dy*dy + dz*dz;
+            double sigma = sol.sigma * L;
+            double amp   = sol.amp * L;
 
-            rho[idx] += sol.amp * sol.norm * std::exp(-r2 / (2 * sol.sigma * sol.sigma));
+            rho[idx] += amp * sol.norm * std::exp(-r2 / (2 * sigma * sigma));
         }
 
         rho_sum += rho[idx];

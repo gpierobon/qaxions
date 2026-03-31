@@ -380,9 +380,13 @@ void IO::writeMeas(const Field& field,
     const int N       = field.size();
     const int dim     = field.dim();
     const int curr    = field.curr();
+    const int cosmo   = field.cosmo();
     const double Lbox = field.Lbox();
     const double time = field.time();
+    const double tJ   = field.timeJ();
     const double a    = field.a();
+
+    const double tnorm = time/tJ;
 
     if (write_rhomax)
     {
@@ -402,7 +406,9 @@ void IO::writeMeas(const Field& field,
     writeAttribute<int>   ("Header", "N",    N);
     writeAttribute<int>   ("Header", "dim",  dim);
     writeAttribute<int>   ("Header", "step", curr);
+    writeAttribute<int>   ("Header", "cosmo",cosmo);
     writeAttribute<double>("Header", "time", time);
+    writeAttribute<double>("Header", "tnorm",tnorm);
     writeAttribute<double>("Header", "a",    a);
     writeAttribute<double>("Header", "Lbox", Lbox);
 }
