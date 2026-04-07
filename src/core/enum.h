@@ -7,6 +7,7 @@ enum class ICType
 {
     SOLITONS,
     SPECTRUM, 
+    READCONF,
     JAXIONS
 };
 

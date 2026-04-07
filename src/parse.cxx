@@ -23,7 +23,7 @@ void defaults(Params& pars)
 
     pars.dir = "output";
     pars.pk_file = "Pk.txt";
-    pars.ic_file = "jaxions_2D.hdf5";
+    pars.ic_file = "field_0000.h5";
 
     pars.plan = FFTPlanType::ESTIMATE;
     pars.ictype = ICType::SOLITONS;      // To change into SPECTRUM
@@ -48,6 +48,7 @@ void parseArgs(int argc, char* argv[], Params* pars)
         else if (arg == "--seed"   && i+1 < argc) { pars->seed    = atoi(argv[++i]); }
         else if (arg == "--dir"    && i+1 < argc) { pars->dir     = argv[++i]; }
         else if (arg == "--pkfile" && i+1 < argc) { pars->pk_file = argv[++i]; }
+        else if (arg == "--icfile" && i+1 < argc) { pars->ic_file = argv[++i]; }
         else if (arg == "--verb"               ) { pars->verb   = true; }
         else if (arg == "--meas"               )
         {
@@ -67,6 +68,7 @@ void parseArgs(int argc, char* argv[], Params* pars)
             const std::unordered_map<std::string, ICType> map = {
                 {"solitons", ICType::SOLITONS},
                 {"spectrum", ICType::SPECTRUM}, 
+                {"readconf", ICType::READCONF}, 
                 {"jaxions",  ICType::JAXIONS}
             };
             auto it = map.find(s);
@@ -109,6 +111,9 @@ void parseArgs(int argc, char* argv[], Params* pars)
 void setDir(Params* pars)
 {
     std::filesystem::path out_dir = pars->dir;
+    if (pars->ictype == ICType::READCONF)
+        return;
+
     if (std::filesystem::exists(out_dir))
     {
         std::filesystem::remove_all(out_dir);

@@ -87,7 +87,7 @@ void SpectrumIC::apply(Field& field) const
     
     const double dk    = 2.0 * M_PI / L;
     const int    hN    = N / 2;
-    double       norm  = L * L * std::sqrt(a);
+    double       norm  = L * L * std::pow(a, 1.5);
 
     unsigned int seed = p_.seed;
     const std::string pk_file = p_.pk_file;
@@ -110,7 +110,7 @@ void SpectrumIC::apply(Field& field) const
         for (int iy = 0; iy < N; ++iy)
         for (int ix = 0; ix < N; ++ix)
         {
-            int nx = ix;
+            int nx = (ix <= hN) ? ix : ix - N;
             int ny = (iy <= hN) ? iy : iy - N; 
             int nz = (iz <= hN) ? iz : iz - N;
             int idx = ix * N * N + iy * N + iz;
@@ -120,14 +120,21 @@ void SpectrumIC::apply(Field& field) const
             Real kz = dk * nz;
             Real kabs = std::sqrt(kx*kx + ky*ky + kz*kz);
 
-            double a = local_gauss(local_rng);
-            double b = local_gauss(local_rng);
+            double r1 = local_gauss(local_rng);
+            double r2 = local_gauss(local_rng);
 
             double Pk = interpolatePk(pk, kabs) / norm;
             double amp = std::sqrt(Pk);
 
-            field.psi()[idx][0] = a * amp;
-            field.psi()[idx][1] = b * amp;
+            if (kabs == 0.0)
+            {
+                field.psi()[idx][0] = 0.0;
+                field.psi()[idx][1] = 0.0;
+                continue;
+            }
+
+            field.psi()[idx][0] = r1 * amp;
+            field.psi()[idx][1] = r2 * amp;
          }
     }
     

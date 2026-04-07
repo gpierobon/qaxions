@@ -110,7 +110,7 @@ void Field::setCosmo(Params& p)
             a_ = p.ai;
             ds_ = p.dt/a_;
             rho_mean_ = 1.5 * (2.0 * M_PI) * (2.0 * M_PI) * 1.27 * 1.27;
-            alpha_ = 1.0;
+            alpha_ = 4 * M_PI;
             //s_ = getTime(a_); // TO IMPLEMENT
             break;
     }

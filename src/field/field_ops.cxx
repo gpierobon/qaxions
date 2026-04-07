@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------------
 void Field::kick_cpu(double dt)
 {
+    //const Real fac = -dt * a_ * a_; // Without V norm
     const Real fac = -dt;
 
     #pragma omp parallel for simd//schedule(dynamic)
@@ -181,6 +182,7 @@ void Field::updatePotential_cpu()
 {
     PROFILE(POISSON);
 
+    //const Real pref = alpha_ / a_; // Without V norm
     const Real pref = alpha_ * a_;
 
     #pragma omp parallel for simd //schedule(static)

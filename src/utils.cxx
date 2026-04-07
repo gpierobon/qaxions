@@ -117,6 +117,7 @@ void printParams(const Field& f, const Params& p)
         {
             case ICType::SOLITONS: return "SOLITONS";
             case ICType::SPECTRUM: return "SPECTRUM";
+            case ICType::READCONF: return "READCONF";
             case ICType::JAXIONS:  return "JAXIONS";
             default: return "UNKNOWN";
         }
@@ -186,13 +187,17 @@ void printParams(const Field& f, const Params& p)
     std::cout << "  dt (init)      = " << f.ds() << "\n";
     std::cout << "  nsteps         = " << p.nsteps << "\n";
     if (f.cosmo() == 1)
+    {
         std::cout << "  a_i            = " << p.ai << "\n";
+        std::cout << "  alpha          = " << f.alpha() << "\n";
+    }
+    else
+        std::cout << "  alpha          = " << p.alpha << "\n";
 
-    std::cout << "  alpha          = " << p.alpha << "\n";
     std::cout << "  IC type        = " << icToString(p.ictype) << "\n";
     if (p.ictype == ICType::SPECTRUM)
         std::cout << "  IC file        = " << p.pk_file << "\n";
-    if (p.ictype == ICType::JAXIONS)
+    if (p.ictype == ICType::READCONF || p.ictype == ICType::JAXIONS)
         std::cout << "  IC file        = " << p.ic_file << "\n";
     std::cout << "  IC seed        = " << p.seed << "\n\n";
 
@@ -238,9 +243,9 @@ void printHelp()
       --alpha  <float>   Control parameter for collapse (default: 4000)
       --dt     <float>   Initial time step
       --steps  <int>     Number of time steps
-      --ic     <int>     IC type: solitons (0) | spectrum (1) | jaxions (2)
-      --pkfile <string>  Power spectrum file (required for --ic 1)
-      --icfile <string>  Jaxions HDF5 restart file (required for --ic 2)
+      --ic     <int>     IC type: solitons | spectrum | readconf | jaxions 
+      --pkfile <string>  Power spectrum file (required for --ic spectrum)
+      --icfile <string>  HDF5 restart file (required for --ic readconf/jaxions)
       --seed   <int>     Random seed for IC generation
 
     Measurement options:

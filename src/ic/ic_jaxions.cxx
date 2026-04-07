@@ -15,7 +15,7 @@ void JaxionsIC::apply(Field& field) const
     
     if (verb)
     {
-        std::cout << " jaxions restart successful. Grid: N=" << field.size()
+        std::cout << "jaxions restart successful. Grid: N=" << field.size()
                   << ", dim=" << field.dim()
                   << ", sites=" << field.sites() << "\n";
     }
